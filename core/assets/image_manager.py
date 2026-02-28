@@ -5,6 +5,7 @@ from os import PathLike
 # External
 import pygame
 
+# Image Manager Class
 class ImageManager:
     def __init__(self):
         self.image_dict: dict[str, pygame.surface.Surface] = {}
@@ -16,8 +17,12 @@ class ImageManager:
         for path_to_image, image_name in images.items():
             self.load_image(path_to_image, image_name, colorkey)
 
-    def load_image(self, path_to_image: PathLike, image_name: str, colorkey: tuple = (0, 0, 0)) -> pygame.surface.Surface:
+    def load_image(self, path_to_image: PathLike, image_name: str, image_size: tuple = (0, 0), colorkey: tuple = (0, 0, 0)) -> pygame.surface.Surface:
         image = pygame.image.load(path_to_image).convert()
+
+        if image_size != (0, 0):
+            image = pygame.transform.smoothscale(image, image_size)
+
         self.register_image(image, image_name, colorkey)
 
         return image

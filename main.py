@@ -7,6 +7,8 @@ import pygame
 from pygame.locals import *
 
 # Internal
+from assets import Images
+from core import *
 from scenes import *
 
 class Game:
@@ -17,10 +19,10 @@ class Game:
         self.fps = fps
 
         self.scene_manager = SceneManager()
-        self.scene_manager.register_scene(TitleScreen(), "Title")
+        self.scene_manager.register_scene(TitleScene(), "Title")
         self.scene_manager.set_scene("Title")
 
-        pygame.display.set_caption("Winter Jam 2026")
+        pygame.display.set_caption("[INSERT TITLE HERE]")
 
     async def start(self):
         self.is_running = True
@@ -42,7 +44,7 @@ class Game:
             self.scene_manager.update(delta_time)
 
             # Draw frame
-            self.screen.fill((0, 0, 0))
+            self.screen.fill((40, 40, 40))
             self.scene_manager.draw(self.screen)
 
             # Flip display
@@ -57,7 +59,7 @@ class Game:
 # Entry point
 if __name__ == "__main__":
     game = Game(
-        screen_size=(640, 360),
+        screen_size=(1024, 576),
         fps=0
     )
 

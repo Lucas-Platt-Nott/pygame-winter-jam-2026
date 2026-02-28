@@ -6,6 +6,7 @@ import pygame
 
 # Scene class
 class Scene(ABC):
+    @abstractmethod
     def start(self) -> None:
         pass
 
@@ -21,5 +22,6 @@ class Scene(ABC):
     def draw(self, surface: pygame.surface.Surface) -> None:
         pass
 
+    @abstractmethod
     def stop(self) -> None:
         pass

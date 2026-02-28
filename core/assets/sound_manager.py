@@ -5,6 +5,7 @@ from os import PathLike
 # External
 import pygame
 
+# Sound Manager Class
 class SoundManager:
     def __init__(self):
         self.sound_dict: dict[str, pygame.mixer.Sound] = {}
