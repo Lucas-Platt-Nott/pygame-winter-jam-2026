@@ -6,40 +6,85 @@ import pygame
 from pygame.locals import *
 
 # Internal
-from assets import Images
-from core import SceneManager, Scene
+from assets import Images, Sounds
+from core import SceneManager, Scene, Button
 from config import *
 
-# Title Scene
 class Title(Scene):
     def __init__(self, scene_manager: SceneManager) -> None:
         self.scene_manager = scene_manager
         self.cards: list[AnimatedCard] = []
+
         self.width = SCREEN_SIZE[0] / 2
+        self.intro_time_elapsed = 0
+        self.alpha = 0
+
+        self.title_image = Images.get_image("title")
+        self.title_w = self.title_image.width
+        self.title_h = self.title_image.height
+        self.title_position = (
+            (SCREEN_SIZE[0] - self.title_w) / 2,
+            SCREEN_SIZE[1] / 2 - self.title_h / 2
+        )
+
         self.time_elapsed = 0
         self.interval = 1/60
+
+        # Cache constants
+        self.screen_w, self.screen_h = SCREEN_SIZE
+        self.card_w, self.card_h = CARD_SIZE
+
+        # Cache background once
+        self.base_background = Images.get_image("title-background")
+        
+    def start(self):
+        self.intro_time_elapsed = 0
+        self.cards.clear()
+
+        # Start BGM
+        Sounds.get_sound("title-background").play(-1, -1, 500)
 
         for card_type in TYPES:
             for suit in SUITS:
                 for rank in RANKS:
+                    tint = 100 #random.randint(40, 60)
+
+                    # Use pre-rotated image
+                    card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_card"), random.randint(0, 180))
+                    card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
+
                     card = AnimatedCard(
-                        pygame.transform.rotate(Images.get_image(f"{card_type}_card"), random.randint(0, 180)),
+                        card_image,
                         pygame.Vector2(
-                            random.randint(0, 1024 - CARD_SIZE[0] // 2),
-                            random.randint(0, 576 - CARD_SIZE[1] // 2)
+                            random.randint(0, self.screen_w - self.card_w // 2),
+                            random.randint(0, self.screen_h - self.card_h // 2)
                         )
                     )
-            
                     self.cards.append(card)
 
     def handle_event(self, event: pygame.Event) -> None:
-        if event.type == MOUSEMOTION and not pygame.mouse.get_pressed()[0]:
+        if event.type == MOUSEMOTION:
+            mouse_pos = pygame.Vector2(event.pos)
             for card in self.cards:
-                card.handle_motion(event)
+                card.handle_motion(mouse_pos)
 
     def update(self, delta_time: float) -> None:
-        self.time_elapsed += delta_time
+        self.intro_time_elapsed += delta_time
 
+        if self.intro_time_elapsed < 1.5:
+            self.alpha = 255 * (self.intro_time_elapsed / 1.5)
+            self.title_image.set_alpha(self.alpha)
+
+        elif 2.5 < self.intro_time_elapsed < 3.5:
+            t = (self.intro_time_elapsed - 2.5)
+            offset = (self.screen_h / 2 - self.title_h / 2) * 0.8 * t
+            self.title_position = (
+                (self.screen_w - self.title_w) / 2,
+                (self.screen_h / 2 - self.title_h / 2) - offset
+            )
+
+        # Update cards at fixed interval
+        self.time_elapsed += delta_time
         if self.time_elapsed >= self.interval:
             for card in self.cards:
                 card.update(self.time_elapsed)
@@ -49,26 +94,31 @@ class Title(Scene):
         return super().update(delta_time)
 
     def draw(self, surface: pygame.Surface) -> None:
-        title_background = Images.get_image("title-background").copy()
-        title_image = Images.get_image("title")
+        # Get credits
+        credits = Images.get_image("credits")
+
+        # Copy cached background
+        title_background = self.base_background.copy()
 
         for card in self.cards:
             card.draw(title_background)
 
-        # pygame.transform.box_blur(title_background, 2, dest_surface=surface)
         surface.blit(title_background)
-        surface.blit(title_image, ((SCREEN_SIZE[0] - title_image.width) / 2, SCREEN_SIZE[1] / 2 - title_image.height / 2))
+        surface.blit(credits, (SCREEN_SIZE[0] / 2 - credits.width / 2, 0))
+        surface.blit(self.title_image, self.title_position)
+
+    def stop(self):
+        self.cards.clear()
+
 
 class AnimatedCard:
     def __init__(self, surface: pygame.Surface, center: pygame.Vector2) -> None:
         self.image = surface
-        self.width = self.image.get_width()
-        self.height = self.image.get_height()
+        self.width = surface.get_width()
+        self.height = surface.get_height()
         self.center = center
-        
-        # Simulation
-        self.is_active = False
 
+        self.is_active = False
         self.old_velocity = pygame.Vector2()
         self.velocity = pygame.Vector2()
 
@@ -77,40 +127,44 @@ class AnimatedCard:
         self.friction = 5
         self.falling_speed = 100
 
-    def handle_motion(self, event: pygame.Event) -> None:
-        mouse_pos = pygame.Vector2(event.dict["pos"])
-        distance = self.center - mouse_pos
+        # Cache half-size vector
+        self.half_size = pygame.Vector2(self.width / 2, self.height / 2)
 
-        if distance.magnitude() < self.collide_radius:
+    def handle_motion(self, mouse_pos: pygame.Vector2) -> None:
+        distance = self.center - mouse_pos
+        dist_mag = distance.length()
+
+        if dist_mag < self.collide_radius:
             self.is_active = True
             self.old_velocity = self.velocity
-            self.velocity = ((distance.normalize() * (self.collide_radius - distance.magnitude())) * self.separation_magnitude + self.old_velocity) / 2
-            
+
+            # Avoid repeated magnitude/normalize calls
+            push = distance.normalize() * (self.collide_radius - dist_mag)
+            self.velocity = (push * self.separation_magnitude + self.old_velocity) / 2
+
     def update(self, delta_time: float) -> None:
         self.center.y += self.falling_speed * delta_time
-        if self.center.y - self.height / 2 > SCREEN_SIZE[1]:
-            self.center = pygame.Vector2(
-                    random.randint(0, 1024 - self.width // 2),
-                    -self.height // 2
-                )
-        
-        if self.center.x - self.width / 2 < -self.width:
-            self.center.x = SCREEN_SIZE[0] + self.width / 2
 
-        elif self.center.x - self.width / 2 > SCREEN_SIZE[0] + self.width / 2:
+        if self.center.y - self.height / 2 > SCREEN_SIZE[1]:
+            self.center.x = random.randint(0, SCREEN_SIZE[0] - self.width // 2)
+            self.center.y = -self.height / 2
+
+        if self.center.x < -self.width:
+            self.center.x = SCREEN_SIZE[0] + self.width / 2
+        elif self.center.x > SCREEN_SIZE[0] + self.width:
             self.center.x = -self.width / 2
 
         if not self.is_active:
             return
-        
-        if self.velocity.magnitude() > 2:
-            self.velocity = self.velocity - (self.friction * 9.8 * delta_time) * self.velocity.normalize()
 
+        vel_mag = self.velocity.length()
+        if vel_mag > 2:
+            self.velocity -= (self.friction * 9.8 * delta_time) * (self.velocity / vel_mag)
         else:
             self.is_active = False
-            self.velocity = pygame.Vector2()
+            self.velocity.update(0, 0)
 
         self.center += self.velocity * delta_time
 
     def draw(self, surface: pygame.Surface):
-        surface.blit(self.image, self.center - pygame.Vector2(self.image.get_size()) / 2)
+        surface.blit(self.image, self.center - self.half_size)
