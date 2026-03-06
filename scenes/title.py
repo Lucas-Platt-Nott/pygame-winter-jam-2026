@@ -11,7 +11,7 @@ from core import SceneManager, Scene, Button
 from config import *
 
 class Title(Scene):
-    def __init__(self, scene_manager: SceneManager) -> None:
+    def __init__(self, scene_manager: SceneManager, player) -> None:
         self.scene_manager = scene_manager
         self.cards: list[AnimatedCard] = []
 
@@ -28,7 +28,7 @@ class Title(Scene):
         )
 
         self.time_elapsed = 0
-        self.interval = 1/60
+        self.interval = 1/100
 
         # Cache constants
         self.screen_w, self.screen_h = SCREEN_SIZE
@@ -45,14 +45,20 @@ class Title(Scene):
         Sounds.get_sound("title-background").play(-1, -1, 500)
 
         for card_type in TYPES:
+            if card_type not in ["default"]:
+                continue
+
             for suit in SUITS:
                 for rank in RANKS:
-                    tint = 100 #random.randint(40, 60)
+                    if rank in ["J", "Q", "K", "A"]:
+                        continue
+
+                    tint = random.randint(100, 130)
 
                     # Use pre-rotated image
-                    card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_card"), random.randint(0, 180))
+                    card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_{suit}_{rank}"), random.randint(0, 180))
                     card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
-
+ 
                     card = AnimatedCard(
                         card_image,
                         pygame.Vector2(
@@ -69,19 +75,19 @@ class Title(Scene):
                 card.handle_motion(mouse_pos)
 
     def update(self, delta_time: float) -> None:
-        self.intro_time_elapsed += delta_time
+        # self.intro_time_elapsed += delta_time
 
-        if self.intro_time_elapsed < 1.5:
-            self.alpha = 255 * (self.intro_time_elapsed / 1.5)
-            self.title_image.set_alpha(self.alpha)
+        # if self.intro_time_elapsed < 1.5:
+        #     self.alpha = 255 * (self.intro_time_elapsed / 1.5)
+        #     self.title_image.set_alpha(self.alpha)
 
-        elif 2.5 < self.intro_time_elapsed < 3.5:
-            t = (self.intro_time_elapsed - 2.5)
-            offset = (self.screen_h / 2 - self.title_h / 2) * 0.8 * t
-            self.title_position = (
-                (self.screen_w - self.title_w) / 2,
-                (self.screen_h / 2 - self.title_h / 2) - offset
-            )
+        # elif 2.5 < self.intro_time_elapsed < 3.5:
+        #     t = (self.intro_time_elapsed - 2.5)
+        #     offset = (self.screen_h / 2 - self.title_h / 2) * 0.8 * t
+        #     self.title_position = (
+        #         (self.screen_w - self.title_w) / 2,
+        #         (self.screen_h / 2 - self.title_h / 2) - offset
+        #     )
 
         # Update cards at fixed interval
         self.time_elapsed += delta_time

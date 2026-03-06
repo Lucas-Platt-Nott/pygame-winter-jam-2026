@@ -1,23 +1,24 @@
-# Dimensions
-SCREEN_SIZE = (1024, 576)
-CARD_SIZE = (60, 84)
+# Built-In
+import json
 
-# Card config
-TYPES: list[str] = ["default", "frozen"]
-SUITS: list[str] = ["hearts", "diamonds", "spades", "clubs"]
-RANKS: list[str] = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
-VALUES: dict[str, int] = {
-    "2": 2,
-    "3": 3,
-    "4": 4,
-    "5": 5,
-    "6": 6,
-    "7": 7,
-    "8": 8,
-    "9": 9,
-    "10": 10,
-    "J": 10,
-    "Q": 10,
-    "K": 10,
-    "A": 11,
-}
+# Sizes
+SCREEN_SIZE = (1024, 576)
+CARD_SIZE = (
+    int(60 * 1.35),
+    int(84 * 1.35)
+)
+
+# Card-Data
+with open("data/cards.json", "r") as file:
+    CARD_DATA = json.load(file)
+
+    TYPES = CARD_DATA["types"]
+    SUITS = CARD_DATA["suits"]
+    RANKS = CARD_DATA["ranks"]
+
+with open("data/values.json", "r") as file:
+    VALUES = json.load(file)
+
+# Hand-Data
+with open("data/hands.json", "r") as file:
+    HAND_DATA = json.load(file)

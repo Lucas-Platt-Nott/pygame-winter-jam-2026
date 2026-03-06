@@ -9,8 +9,8 @@ from pygame.locals import *
 # Internal
 from core import SceneManager
 
-# Game Class
-class Game:
+# Application Class
+class Application:
     def __init__(self, screen_size: tuple[int, int], flags: int = 0, fps: int = 0):
         self.screen = pygame.display.set_mode(screen_size, SCALED | FULLSCREEN)
         self.clock = pygame.Clock()
@@ -18,7 +18,7 @@ class Game:
 
         self.is_running = False
         self.scene_manager = SceneManager()
-    
+
     def add_scene(self, scene_type: type, scene_key: str) -> None:
         scene = scene_type(self.scene_manager)
         self.scene_manager.register_scene(scene, scene_key)

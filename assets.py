@@ -1,3 +1,6 @@
+# Built-In
+import os
+
 # External
 import pygame
 
@@ -62,12 +65,13 @@ Images.register_image(
     "title-background"
 )
 
-Images.register_image(
-    pygame.transform.scale(pygame.image.load("card.png"), CARD_SIZE),
-    "default_card"
-)
-
-Images.register_image(
-    pygame.transform.scale(pygame.image.load("frozen_card.png"), CARD_SIZE),
-    "frozen_card"
-)
+# Load card images
+for file_path in os.listdir("assets/images/cards"):
+    Images.register_image(
+        pygame.transform.smoothscale(
+            pygame.image.load(f"assets/images/cards/{file_path}"),
+            CARD_SIZE
+        ),
+        file_path.split(".")[0],
+        colorkey=(0, 255, 0)
+    )

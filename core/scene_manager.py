@@ -21,10 +21,10 @@ class Scene:
 # Scene Manager class
 class SceneManager:
     def __init__(self):
-        self.scene_dict: dict[str, type[Scene]] = {}
+        self.scene_dict: dict[str, Scene] = {}
         self.current_scene: str = ""
 
-    def register_scene(self, scene: type[Scene], scene_name: str) -> None:
+    def register_scene(self, scene: Scene, scene_name: str) -> None:
         self.scene_dict[scene_name] = scene
 
     def unregister_scene(self, scene_name: str) -> None:
