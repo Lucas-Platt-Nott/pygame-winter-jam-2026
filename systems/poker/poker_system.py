@@ -9,71 +9,105 @@ from pygame.locals import *
 # Internal
 from assets import Images
 from config import *
-import systems.player
-from systems.poker import Deck, Hand, PokerPlayer
+from systems.poker import Deck, Hand, PokerPlayer, CardData
 
-# Poker Renderer Class
 class PokerRenderer:
-    def __init__(self) -> None:
-        self.hand_width = CARD_SIZE[0] * 5
+    HOVER_LIFT = 20  # pixels to lift hovered cards
 
     def render_hand(self, hand, hidden=False):
+        """Render a hand, update card rects and return the surface."""
         width, height = CARD_SIZE
-        num_cards = len(hand.cards)
+        num = len(hand.cards)
 
-        spacing = width * 0.75          # horizontal spacing
-        max_angle = 8               # very small rotation
-        curve_height = 20           # subtle vertical arc
+        spacing = width * 0.75
+        max_angle = 8
+        curve_h = 20
 
-        surface_width = int(width + spacing * (num_cards - 1) + 40)
-        surface_height = height + curve_height + 40
+        surf_w = int(width + spacing * (num - 1) + 40)
+        surf_h = height + curve_h + 40 + self.HOVER_LIFT
+        surface = pygame.Surface((surf_w, surf_h), pygame.SRCALPHA)
 
-        surface = pygame.Surface((surface_width, surface_height), pygame.SRCALPHA)
+        mid = (num - 1) / 2 or 1
+        cx = surf_w / 2
 
-        mid = (num_cards - 1) / 2
-        center_x = surface_width / 2
+        for i, card_data in enumerate(hand.cards):
 
-        card = Images.get_image("card_back")
+            # Choose back image if hidden
+            card_image = Images.get_image(
+                "card_back" if hidden else card_data.card_name
+            )
 
-        for index, card_name in enumerate(hand.cards):
-            if not hidden:
-                card = Images.get_image(card_name)
+            # normalized position: -1 (left) → 0 (center) → 1 (right)
+            normalized_position = (i - mid) / mid
 
-            position_magnitude = (index - mid) / mid if mid != 0 else 0  # -1 → 1
+            angle = -max_angle * normalized_position**3
+            y_off = curve_h * normalized_position**2
 
-            # smoother rotation curve
-            angle = -max_angle * (position_magnitude ** 3)
+            # lift card if hovered
+            lift = self.HOVER_LIFT if card_data.hovered else 0
 
-            # shallow vertical curve
-            y_offset = curve_height * (position_magnitude ** 2)
-
-            rotated = pygame.transform.rotate(card, angle)
-            rect = rotated.get_rect()
-
-            x = center_x + (index - mid) * spacing
-            y = 20 + y_offset
-
-            rect.center = (x, y + height/2)
+            rotated = pygame.transform.rotate(card_image, angle)
+            rect = rotated.get_rect(center=(
+                cx + (i - mid) * spacing,
+                20 + y_off + height / 2 - lift
+            ))
 
             surface.blit(rotated, rect)
 
+            # store hitbox
+            card_data.rect = rect
+
+        hand.surface = surface
         return surface
-    
+
     def draw(self, surface: pygame.Surface, poker: PokerSystem) -> None:
-        center_y = SCREEN_SIZE[1] // 2
+        """Draw both player and opponent hands on the main surface."""
         center_x = SCREEN_SIZE[0] // 2
 
         player_hand = poker.player.hand
-        surface.blit(player_hand.surface, (
-            center_x - player_hand.surface.width // 2,
-            SCREEN_SIZE[1] - player_hand.surface.height + 50
-        ))
-
         opponent_hand = poker.opponent.hand
-        surface.blit(opponent_hand.surface, (
-            center_x - opponent_hand.surface.width // 2,
+
+        # Render hands
+        self.render_hand(player_hand, hidden=False)
+        self.render_hand(opponent_hand, hidden=True)
+
+        # Compute positions
+        player_pos = (
+            center_x - player_hand.surface.get_width() // 2,
+            SCREEN_SIZE[1] - player_hand.surface.get_height() + 60
+        )
+        opponent_pos = (
+            center_x - opponent_hand.surface.get_width() // 2,
             -50
-        ))
+        )
+
+        # Blit surfaces
+        surface.blit(player_hand.surface, player_pos)
+        surface.blit(opponent_hand.surface, opponent_pos)
+
+        # store offsets for click detection / hover
+        player_hand.render_offset = player_pos
+        opponent_hand.render_offset = opponent_pos
+
+    # ----------------------------
+    # Utility for interaction
+    # ----------------------------
+
+    def update_hover(self, hand: Hand, mouse_pos) -> None:
+        altered_pos = pygame.Vector2(mouse_pos)
+        altered_pos -= hand.render_offset
+
+        for card in hand.cards:
+            if card.rect and card.rect.collidepoint(altered_pos):
+                card.hover()
+            else:
+                card.unhover()
+
+    def get_clicked_card(self, hand: list[CardData], mouse_pos) -> CardData | None:
+        for card in hand:
+            if card.rect and card.rect.collidepoint(mouse_pos):
+                return card
+        return None
 
 # Poker System Class
 class PokerSystem:
@@ -95,18 +129,15 @@ class PokerSystem:
 
         self.deck.refill()
         self.draw_cards(self.player.hand, 5)
-        self.draw_cards(self.opponent.hand, 5, hidden=True)
+        self.draw_cards(self.opponent.hand, 5)
 
-    def draw_cards(self, hand, amount, hidden=False) -> None:
+    def draw_cards(self, hand, amount) -> None:
         hand.draw_cards(self.deck, amount)
-        hand.surface = self.renderer.render_hand(hand, hidden=hidden)
-
-        if hidden:
-            hand.surface = pygame.transform.rotate(hand.surface, 180)
+        hand.surface = self.renderer.render_hand(hand, hidden=hand.is_hidden)
 
     def handle_motion(self, event: pygame.Event) -> None:
-        pass
-    
+        self.renderer.update_hover(self.player.hand, event.dict["pos"])
+
     def update(self, delta_time: float) -> None:
         pass
 
