@@ -4,8 +4,8 @@ import json
 # Sizes
 SCREEN_SIZE = (1024, 576)
 CARD_SIZE = (
-    int(60 * 1.35),
-    int(84 * 1.35)
+    int(60 * 1.5),
+    int(84 * 1.5)
 )
 
 # Card-Data

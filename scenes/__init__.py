@@ -1,2 +1,2 @@
-from .game import Game
+from .poker import Poker
 from .title import Title

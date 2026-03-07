@@ -28,8 +28,8 @@ if __name__ == "__main__":
     # Initialise game
     application = FrozenFunds(SCREEN_SIZE)
 
-    application.add_scene(Game, "game")
+    application.add_scene(Poker, "poker")
     application.add_scene(Title, "title")
-    application.set_scene("title")
+    application.set_scene("poker")
 
     asyncio.run(application.start())

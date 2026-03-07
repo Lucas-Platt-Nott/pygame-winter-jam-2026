@@ -6,9 +6,10 @@ from pygame.locals import *
 from assets import Images, Sounds
 from core import SceneManager, Scene
 from config import *
-from systems import PokerSystem, PokerPlayer, Player
-# Game Class
-class Game(Scene):
+from systems import PokerSystem, PokerRenderer, PokerPlayer, Player
+
+# Poker Class
+class Poker(Scene):
     def __init__(self, scene_manager: SceneManager, player: Player) -> None:
         self.scene_manager = scene_manager
         self.player = player
@@ -18,8 +19,15 @@ class Game(Scene):
             PokerPlayer()
         )
 
+    def start(self) -> None:
+        self.poker_system.start()
+
+    def handle_event(self, event: pygame.Event) -> None:
+        if event.type == MOUSEMOTION:
+            self.poker_system.handle_motion(event)
+
     def update(self, delta_time: float) -> None:
-        pass
+        self.poker_system.update(delta_time)
 
     def draw(self, surface: pygame.Surface) -> None:
-        pass
+        self.poker_system.draw(surface)

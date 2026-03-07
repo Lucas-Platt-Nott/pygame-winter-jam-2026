@@ -53,7 +53,7 @@ class Title(Scene):
                     if rank in ["J", "Q", "K", "A"]:
                         continue
 
-                    tint = random.randint(100, 130)
+                    tint = random.randint(80, 140)
 
                     # Use pre-rotated image
                     card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_{suit}_{rank}"), random.randint(0, 180))
@@ -64,9 +64,12 @@ class Title(Scene):
                         pygame.Vector2(
                             random.randint(0, self.screen_w - self.card_w // 2),
                             random.randint(0, self.screen_h - self.card_h // 2)
-                        )
+                        ),
+                        tint
                     )
                     self.cards.append(card)
+
+        self.cards.sort(key=lambda card: card.tint)
 
     def handle_event(self, event: pygame.Event) -> None:
         if event.type == MOUSEMOTION:
@@ -75,25 +78,25 @@ class Title(Scene):
                 card.handle_motion(mouse_pos)
 
     def update(self, delta_time: float) -> None:
-        # self.intro_time_elapsed += delta_time
+        self.intro_time_elapsed += delta_time
 
-        # if self.intro_time_elapsed < 1.5:
-        #     self.alpha = 255 * (self.intro_time_elapsed / 1.5)
-        #     self.title_image.set_alpha(self.alpha)
+        if self.intro_time_elapsed < 1.5:
+            self.alpha = 255 * (self.intro_time_elapsed / 1.5)
+            self.title_image.set_alpha(self.alpha)
 
-        # elif 2.5 < self.intro_time_elapsed < 3.5:
-        #     t = (self.intro_time_elapsed - 2.5)
-        #     offset = (self.screen_h / 2 - self.title_h / 2) * 0.8 * t
-        #     self.title_position = (
-        #         (self.screen_w - self.title_w) / 2,
-        #         (self.screen_h / 2 - self.title_h / 2) - offset
-        #     )
+        elif 2.5 < self.intro_time_elapsed < 3.5:
+            t = (self.intro_time_elapsed - 2.5)
+            offset = (self.screen_h / 2 - self.title_h / 2) * 0.8 * t
+            self.title_position = (
+                (self.screen_w - self.title_w) / 2,
+                (self.screen_h / 2 - self.title_h / 2) - offset
+            )
 
         # Update cards at fixed interval
         self.time_elapsed += delta_time
         if self.time_elapsed >= self.interval:
             for card in self.cards:
-                card.update(self.time_elapsed)
+                card.update(self.interval)
 
             self.time_elapsed = 0
 
@@ -116,13 +119,13 @@ class Title(Scene):
     def stop(self):
         self.cards.clear()
 
-
 class AnimatedCard:
-    def __init__(self, surface: pygame.Surface, center: pygame.Vector2) -> None:
+    def __init__(self, surface: pygame.Surface, center: pygame.Vector2, tint: int) -> None:
         self.image = surface
         self.width = surface.get_width()
         self.height = surface.get_height()
         self.center = center
+        self.tint = tint
 
         self.is_active = False
         self.old_velocity = pygame.Vector2()

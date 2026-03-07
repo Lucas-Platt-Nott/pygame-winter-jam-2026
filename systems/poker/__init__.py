@@ -4,4 +4,4 @@ from .hand import Hand
 from .player import PokerPlayer
 
 # Poker System(s)
-from .poker import PokerSystem
+from .poker_system import PokerSystem, PokerRenderer
