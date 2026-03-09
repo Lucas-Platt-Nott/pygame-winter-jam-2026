@@ -5,12 +5,11 @@ from __future__ import annotations
 import pygame
 
 # Internal
-from systems import PokerPlayer
+from config import *
+from systems import PokerPlayer, Hand
 
 # Player Class
 class Player(PokerPlayer):
     def __init__(self) -> None:
         super().__init__()
-
-    def reset(self) -> None:
-        pass
+        self._hand = Hand((0, SCREEN_SIZE[1] - CARD_SIZE[1] * 1.5))

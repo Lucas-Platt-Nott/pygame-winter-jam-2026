@@ -77,7 +77,21 @@ class Hand:
     def select(self, index: int) -> None:
         if 0 <= index < len(self._cards):
             card = self._cards[index]
+            anim = self.anim_data[card]
+
+            # What is the current offset (how far up it is)?
+            current_offset = anim.get("current_select_offset", 0.0)
+
+            # Toggle selection
             card.selected = not card.selected
+
+            # Target offset based on new state
+            target_offset = -25 if card.selected else 0
+
+            # Reset selection animation
+            anim["select_progress"] = 0.0
+            anim["select_start_offset"] = current_offset
+            anim["select_target_offset"] = target_offset
 
     def handle_click(self, event: pygame.Event) -> None:
         if event.type != pygame.MOUSEBUTTONDOWN:
@@ -111,8 +125,12 @@ class Hand:
             "start_pos": target_pos,
             "current_angle": 45,
             "last_base_pos": target_pos,
-            "selected": False,
-            "select_progress": 0.0
+
+            # selection animation
+            "select_progress": 1.0,
+            "select_start_offset": 0.0,
+            "select_target_offset": 0.0,
+            "current_select_offset": 0.0,
         }
 
         for i, c in enumerate(self._cards):
@@ -152,13 +170,23 @@ class Hand:
 
             angle = lerp_angle(anim["start_angle"], -target_angle, t)
 
+            # Base position
             card.x = base_x
             card.y = base_y
             card.angle = angle
 
-            if card.selected:
-                card.y -= 25
+            # --- Selection animation ---
+            anim["select_progress"] = min(1.0, anim["select_progress"] + delta_time * 4.0)
+            s_t = ease_in_out(anim["select_progress"])
 
+            start_off = anim.get("select_start_offset", 0.0)
+            target_off = anim.get("select_target_offset", 0.0)
+            offset = lerp(start_off, target_off, s_t)
+
+            anim["current_select_offset"] = offset
+            card.y = base_y + offset
+
+            # Draw card
             surf = Images.get_image("card_back") if self.is_hidden else card.render()
             self.surface.blit(surf, (card.x, card.y))
 
@@ -175,9 +203,9 @@ class Hand:
     def update(self, delta_time: float) -> None:
         self.render_surface(delta_time)
 
-    def draw(self, surface: pygame.Surface, position) -> None:
+    def draw(self, surface: pygame.Surface) -> None:
         if self.flip:
             flipped = pygame.transform.rotate(self.surface, 180)
-            surface.blit(flipped, position)
+            surface.blit(flipped, self.position)
         else:
-            surface.blit(self.surface, position)
+            surface.blit(self.surface, self.position)

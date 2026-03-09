@@ -13,26 +13,35 @@ class Poker(Scene):
     def __init__(self, scene_manager: SceneManager, player: Player) -> None:
         self.scene_manager = scene_manager
         self.player = player
-
-        # HAND DEMO CODE
-        self.hand = Hand((0, 0), False, False)
+        self.opponent = PokerPlayer()
         self.deck = Deck(TYPES, SUITS, RANKS)
 
-        # HAND DEMO CODE
 
     def start(self) -> None:
         pass
 
     def handle_event(self, event: pygame.Event) -> None:
         if event.type == KEYDOWN:
-            if event.dict["key"] == K_0:
-                self.hand.add(self.deck.draw_card())
+            key = event.dict["key"]
+            if key == K_1:
+                self.player.hand.add(self.deck.draw_card())
+
+            elif key == K_2:
+                self.player.hand.remove(self.player.hand.cards[-1])
+
+            elif key == K_3:
+                self.opponent.hand.add(self.deck.draw_card())
+
+            elif key == K_4:
+                self.opponent.hand.remove(self.opponent.hand.cards[-1])
 
         elif event.type == MOUSEBUTTONDOWN:
-            self.hand.handle_click(event)
+            self.player.hand.handle_click(event)
 
     def update(self, delta_time: float) -> None:
-        self.hand.update(delta_time)
+        self.player.hand.update(delta_time)
+        self.opponent.hand.update(delta_time)
 
     def draw(self, surface: pygame.Surface) -> None:
-        self.hand.draw(surface, (0, 0))
+        self.player.hand.draw(surface)
+        self.opponent.hand.draw(surface)
