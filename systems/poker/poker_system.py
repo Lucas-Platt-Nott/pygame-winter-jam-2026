@@ -9,6 +9,7 @@ from pygame.locals import *
 # Internal
 from assets import Images
 from config import *
+from systems import StateManager
 from systems.poker import Deck, Hand, PokerPlayer, CardData
 
 class PokerRenderer:
@@ -113,33 +114,28 @@ class PokerRenderer:
 # Poker System Class
 class PokerSystem:
     def __init__(self, player: systems.Player, opponent: PokerPlayer):
-        self.renderer = PokerRenderer()
+        self.community_cards = []
 
         self.player = player
         self.opponent = opponent
 
-        self._deck = Deck(SUITS, RANKS)
-
-    @property
-    def deck(self) -> Deck:
-        return self._deck
+        self.renderer = PokerRenderer()
+        self.deck = Deck(SUITS, RANKS)
     
-    def start(self) -> None:
-        self.player.reset()
-        self.opponent = PokerPlayer()
+    def start(self):
+        self.deck.shuffle()
+        self.deal_cards()
 
-        self.deck.refill()
-        self.draw_cards(self.player.hand, 5)
-        self.draw_cards(self.opponent.hand, 5)
+    def deal_cards(self):
+        for i in range(5):
+            self.player.hand.add_card(self.deck.draw_card())
+        
+        for i in range(5):
+            self.opponent.hand.add_card(self.deck.draw_card())
 
-    def draw_cards(self, hand, amount) -> None:
-        hand.draw_cards(self.deck, amount)
+    def deal_community(self, amount: int):
+        for i in range(amount):
+            self.community_cards.append(self.deck.draw_card())
 
-    def handle_motion(self, event: pygame.Event) -> None:
-        self.renderer.update_hover(self.player.hand, event.dict["pos"])
-
-    def update(self, delta_time: float) -> None:
-        pass
-
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface) -> None:
         self.renderer.draw(surface, self)

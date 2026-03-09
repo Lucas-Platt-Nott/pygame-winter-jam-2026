@@ -17,16 +17,14 @@ class Deck:
             for rank in self.card_ranks
         ]
 
-        self.refill()
+    def shuffle(self) -> None:
+        self.cards = self.standard_cards.copy()
 
     def add_card(self, card_name: str) -> None:
         self.cards.append(card_name)
 
     def remove_card(self, card_name: str) -> None:
         self.cards.remove(card_name)
-
-    def refill(self) -> None:
-        self.cards = self.standard_cards.copy()
 
     def draw_card(self) -> str:
         card_name = random.choice(self.cards)

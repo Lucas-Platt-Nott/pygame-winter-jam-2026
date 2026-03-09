@@ -17,3 +17,4 @@ class PokerPlayer:
     
     def draw(self, surface: pygame.Surface) -> None:
         pass
+

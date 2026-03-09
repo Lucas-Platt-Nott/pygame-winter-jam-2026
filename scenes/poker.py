@@ -23,11 +23,10 @@ class Poker(Scene):
         self.poker_system.start()
 
     def handle_event(self, event: pygame.Event) -> None:
-        if event.type == MOUSEMOTION:
-            self.poker_system.handle_motion(event)
+        pass
 
     def update(self, delta_time: float) -> None:
-        self.poker_system.update(delta_time)
+        pass
 
     def draw(self, surface: pygame.Surface) -> None:
         self.poker_system.draw(surface)
