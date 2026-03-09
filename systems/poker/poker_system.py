@@ -70,15 +70,16 @@ class PokerRenderer:
         # Render hands
         self.render_hand(player_hand, hidden=False)
         self.render_hand(opponent_hand, hidden=True)
+        opponent_hand.surface = pygame.transform.rotate(opponent_hand.surface, 180)
 
         # Compute positions
         player_pos = (
             center_x - player_hand.surface.get_width() // 2,
-            SCREEN_SIZE[1] - player_hand.surface.get_height() + 60
+            SCREEN_SIZE[1] - player_hand.surface.get_height() + 70
         )
         opponent_pos = (
             center_x - opponent_hand.surface.get_width() // 2,
-            -50
+            -70
         )
 
         # Blit surfaces
@@ -133,7 +134,6 @@ class PokerSystem:
 
     def draw_cards(self, hand, amount) -> None:
         hand.draw_cards(self.deck, amount)
-        hand.surface = self.renderer.render_hand(hand, hidden=hand.is_hidden)
 
     def handle_motion(self, event: pygame.Event) -> None:
         self.renderer.update_hover(self.player.hand, event.dict["pos"])
