@@ -134,7 +134,7 @@ class AnimatedCard:
         self.separation_magnitude = 2.5
         self.collide_radius = 100
         self.friction = 5
-        self.falling_speed = 100
+        self.falling_speed = 300
 
         # Cache half-size vector
         self.half_size = pygame.Vector2(self.width / 2, self.height / 2)

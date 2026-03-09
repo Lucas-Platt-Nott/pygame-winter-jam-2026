@@ -12,11 +12,14 @@ from core import SceneManager
 # Application Class
 class Application:
     def __init__(self, screen_size: tuple[int, int], flags: int = 0, fps: int = 0):
-        self.screen = pygame.display.set_mode(screen_size, SCALED | FULLSCREEN)
+        self.screen_size = screen_size
+        self.flags = flags
+        self.screen = pygame.display.set_mode(screen_size, flags)
         self.clock = pygame.Clock()
         self.fps = fps
 
         self.is_running = False
+        self.is_maximised = False
         self.scene_manager = SceneManager()
 
     def add_scene(self, scene_type: type, scene_key: str) -> None:
@@ -43,12 +46,26 @@ class Application:
     
     def handle_events(self) -> None:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == QUIT:
                 # Close Game
                 self.is_running = False
 
             else:
-                # Pass event to Scene-Manager to resolve
+                if event.type == KEYDOWN and event.key == K_F11:
+                    if self.is_maximised:
+                        self.screen = pygame.display.set_mode(
+                            self.screen_size,
+                            self.flags
+                        )
+                        
+                    else:
+                        self.screen = pygame.display.set_mode(
+                            self.screen_size,
+                            self.flags | FULLSCREEN | SCALED
+                        )
+
+                    self.is_maximised = not self.is_maximised
+                
                 self.scene_manager.handle_event(event)
 
     def update(self, delta_time: float) -> None:

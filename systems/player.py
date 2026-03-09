@@ -5,7 +5,7 @@ from __future__ import annotations
 import pygame
 
 # Internal
-from systems.poker import PokerPlayer
+from systems import PokerPlayer
 
 # Player Class
 class Player(PokerPlayer):
@@ -13,4 +13,4 @@ class Player(PokerPlayer):
         super().__init__()
 
     def reset(self) -> None:
-        self.hand.clear()
+        pass

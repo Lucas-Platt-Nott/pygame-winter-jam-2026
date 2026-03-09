@@ -3,6 +3,7 @@ import asyncio
 
 # External
 import pygame
+from pygame.locals import *
 
 # Internal
 from core import Application
@@ -14,7 +15,6 @@ from systems import Player
 class FrozenFunds(Application):
     def __init__(self, screen_size: tuple[int, int], flags: int = 0, fps: int = 0):
         super().__init__(screen_size, flags, fps)
-
         self.player = Player()
 
     def add_scene(self, scene_type: type, scene_key: str) -> None:
