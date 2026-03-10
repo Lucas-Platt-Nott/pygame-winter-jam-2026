@@ -33,5 +33,8 @@ class Deck:
     def draw_card(self) -> Card:
         card = random.choice(self.cards)
         self.remove_card(card)
+
+        if len(self.cards) == 0:
+            self.shuffle()
         
         return card

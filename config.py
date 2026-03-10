@@ -19,10 +19,11 @@ with open("data/hands.json", "r") as file:
 
 
 # Sizes
+ANIM_SPEED = 1.5
 SCREEN_SIZE = (1024, 576)
 CARD_SIZE = (
-    int(60 * 1.5),
-    int(84 * 1.5)
+    int(60 * 4/3),
+    int(84 * 4/3)
 )
 
 # Hand-Rendering Settings

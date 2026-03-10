@@ -14,12 +14,12 @@ class Application:
     def __init__(self, screen_size: tuple[int, int], flags: int = 0, fps: int = 0):
         self.screen_size = screen_size
         self.flags = flags
-        self.screen = pygame.display.set_mode(screen_size, flags)
+        self.screen = pygame.display.set_mode(screen_size, FULLSCREEN | SCALED | flags)
         self.clock = pygame.Clock()
         self.fps = fps
 
         self.is_running = False
-        self.is_maximised = False
+        self.is_maximised = True
         self.scene_manager = SceneManager()
 
     def add_scene(self, scene_type: type, scene_key: str) -> None:
@@ -73,7 +73,7 @@ class Application:
         self.scene_manager.update(delta_time)
 
     def draw(self) -> None:
-        self.screen.fill((10, 10, 20))
+        self.screen.fill((100, 100, 0))
         self.scene_manager.draw(self.screen)
 
         pygame.display.flip()

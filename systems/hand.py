@@ -1,5 +1,6 @@
 # Built-In
 import math
+import random
 
 # External
 import pygame
@@ -10,7 +11,6 @@ from config import *
 from systems import Card
 from assets import Images
 
-ANIM_SPEED = 1.5
 
 def cubic_bezier(t, p0, p1, p2, p3):
     u = 1 - t
@@ -49,9 +49,22 @@ class Hand:
             self.baseline_y + CARD_SIZE[1] + 150
         )
 
+        # Cards currently animating out
+        self.discarding = []
+
     @property
     def cards(self) -> list[Card]:
         return self._cards
+
+    @property
+    def num_cards(self) -> int:
+        count = 0
+
+        for card in self.cards:
+            if card.type != "frozen":
+                count += 1
+
+        return count
 
     def _compute_target(self, index: int, hand_size: int):
         if hand_size <= 0:
@@ -148,9 +161,36 @@ class Hand:
         self.surface.fill((0, 0, 0, 0))
         self.hitboxes = []
 
+        # Draw discarding cards (fade only, no movement)
+        for card in list(self.discarding):
+            anim = self.anim_data.get(card)
+            if not anim:
+                continue
+
+            anim["progress"] = min(1.0, anim["progress"] + delta_time * 1.8)
+            t = ease_in_out(anim["progress"])
+
+            base_x, base_y = anim["discard_start_pos"]
+            angle = lerp_angle(anim["discard_start_angle"], anim["discard_end_angle"], t)
+
+            surf = card.render().copy()
+            surf = pygame.transform.rotate(surf, angle)
+
+            # Faster fade-out
+            fade_t = min(1.0, t * 2.2)
+            alpha = int(255 * (1 - fade_t))
+            surf.set_alpha(alpha)
+
+            self.surface.blit(surf, (base_x, base_y))
+
+            if anim["progress"] >= 1.0:
+                self.discarding.remove(card)
+                self.anim_data.pop(card, None)
+
         if not self._cards:
             return
 
+        # Draw normal cards
         for index, card in enumerate(self._cards):
             target_pos, target_angle = self._compute_target(index, len(self._cards))
             anim = self.anim_data[card]
@@ -170,12 +210,7 @@ class Hand:
 
             angle = lerp_angle(anim["start_angle"], -target_angle, t)
 
-            # Base position
-            card.x = base_x
-            card.y = base_y
-            card.angle = angle
-
-            # --- Selection animation ---
+            # Selection animation
             anim["select_progress"] = min(1.0, anim["select_progress"] + delta_time * 4.0)
             s_t = ease_in_out(anim["select_progress"])
 
@@ -184,7 +219,10 @@ class Hand:
             offset = lerp(start_off, target_off, s_t)
 
             anim["current_select_offset"] = offset
+
+            card.x = base_x
             card.y = base_y + offset
+            card.angle = angle
 
             # Draw card
             surf = Images.get_image("card_back") if self.is_hidden else card.render()
@@ -195,10 +233,41 @@ class Hand:
 
             anim["current_angle"] = angle
             anim["last_base_pos"] = (base_x, base_y)
+            anim["last_draw_pos"] = (card.x, card.y)
+
+    def discard_selected(self) -> None:
+        for card in self.get_selected_cards():
+            self.remove(card)
+
+        # Reflow remaining cards
+        for i, c in enumerate(self._cards):
+            anim = self.anim_data[c]
+            target_pos, target_angle = self._compute_target(i, len(self._cards))
+            anim["start_pos"] = anim["last_base_pos"]
+            anim["start_angle"] = anim["current_angle"]
+            anim["progress"] = 0.0
+            anim["mode"] = "lerp"
 
     def remove(self, card: Card) -> None:
+        if card not in self._cards:
+            return
+
         self._cards.remove(card)
-        self.anim_data.pop(card, None)
+
+        anim = self.anim_data.get(card)
+        if not anim:
+            return
+
+        anim["mode"] = "discard"
+        anim["progress"] = 0.0
+
+        # Use the last drawn position (includes selection offset) so it doesn't snap
+        discard_pos = anim.get("last_draw_pos", anim.get("last_base_pos", (card.x, card.y)))
+        anim["discard_start_pos"] = discard_pos
+        anim["discard_start_angle"] = anim["current_angle"]
+        anim["discard_end_angle"] = anim["current_angle"] + random.randint(60, 140)
+
+        self.discarding.append(card)
 
     def update(self, delta_time: float) -> None:
         self.render_surface(delta_time)

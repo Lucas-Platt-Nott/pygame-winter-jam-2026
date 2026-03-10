@@ -65,10 +65,19 @@ Images.register_image(
     "title-background"
 )
 
+poker_background = pygame.transform.scale(pygame.image.load(f"assets/images/poker_background.png"), SCREEN_SIZE)
+poker_background.fill((200, 200, 200), special_flags=pygame.BLEND_RGB_MULT)
+poker_background = pygame.transform.gaussian_blur(poker_background, 10)
+
+Images.register_image(
+    poker_background,
+    "poker-background"
+)
+
 # Load card images
 for file_path in os.listdir("assets/images/cards"):
     Images.register_image(
-        pygame.transform.smoothscale(
+        pygame.transform.scale(
             pygame.image.load(f"assets/images/cards/{file_path}"),
             CARD_SIZE
         ),
