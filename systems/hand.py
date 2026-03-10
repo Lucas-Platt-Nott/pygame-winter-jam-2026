@@ -99,6 +99,14 @@ class Hand:
             anim["select_start_offset"] = current_offset
             anim["select_target_offset"] = target_offset
 
+    def select_random(self) -> None:
+        while True:
+            index = random.randint(0, len(self.cards) - 1)
+            if self.cards[index].type != "frozen" and not self.cards[index].selected:
+                break
+
+        self.select(index)
+
     def handle_click(self, event: pygame.Event) -> None:
         if event.type != pygame.MOUSEBUTTONDOWN:
             return

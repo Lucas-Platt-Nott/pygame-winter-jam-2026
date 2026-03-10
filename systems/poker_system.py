@@ -1,4 +1,5 @@
 # Built-In
+import random
 from enum import Enum, auto
 
 # External
@@ -68,12 +69,27 @@ class PokerSystem:
 
         elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
             self.state["phase"] = PhaseState.DISCARD
+
+        elif phase_state == PhaseState.NEXT_PHASE:
+            self.opponent.hand.select_random()
+            self.opponent.hand.select_random()
+            self.opponent.hand.select_random()
+            self.opponent.hand.discard_selected()
             
-    # FLOP
-    def update_flop(self, delta_time: float) -> None:
+            self.state["phase"] = PhaseState.DRAW
+            self.state["round"] = RoundState.FLOP
+            
+    # FLOP / RIVER / TURN
+    def update_round(self, delta_time: float) -> None:
         phase_state = self.state["phase"]
+        round_state = self.state["round"]
+
+        n = 3 if round_state == RoundState.FLOP else 1
 
         if phase_state == PhaseState.DRAW:
+            for i in range(n):
+                self.community_cards.add(self.deck.draw_card())
+
             self.player.queue_draw(2)
             self.opponent.queue_draw(2)
 
@@ -82,31 +98,24 @@ class PokerSystem:
         elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
             self.state["phase"] = PhaseState.BET
 
-    # RIVER
-    def update_river(self, delta_time: float) -> None:
-        phase_state = self.state["phase"]
+        elif phase_state == PhaseState.BET:
+            self.state["phase"] = PhaseState.DISCARD
+            
+        elif phase_state == PhaseState.NEXT_PHASE:
+            self.opponent.hand.select_random()
+            self.opponent.hand.discard_selected()
+            self.state["phase"] = PhaseState.DRAW
 
-        if phase_state == PhaseState.DRAW:
-            self.player.queue_draw(2)
-            self.opponent.queue_draw(2)
+            if round_state == RoundState.FLOP:
+                self.state["round"] = RoundState.RIVER
 
-            self.state["phase"] = PhaseState.DRAWING
+            elif round_state == RoundState.RIVER:
+                self.state["round"] = RoundState.TURN
 
-        elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
-            self.state["phase"] = PhaseState.BET
+            elif round_state == RoundState.TURN:
+                self.state["round"] = RoundState.SHOWDOWN
 
-    # TURN
-    def update_turn(self, delta_time: float) -> None:
-        phase_state = self.state["phase"]
-
-        if phase_state == PhaseState.DRAW:
-            self.player.queue_draw(2)
-            self.opponent.queue_draw(2)
-
-            self.state["phase"] = PhaseState.DRAWING
-
-        elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
-            self.state["phase"] = PhaseState.BET
+            print(round_state)
 
     # SHOWDOWN
     def update_showdown(self, delta_time: float) -> None:
@@ -123,13 +132,13 @@ class PokerSystem:
             self.update_preflop(delta_time)
 
         elif round_state == RoundState.FLOP:
-            self.update_flop(delta_time)
+            self.update_round(delta_time)
 
         elif round_state == RoundState.RIVER:
-            self.update_river(delta_time)
+            self.update_round(delta_time)
 
         elif round_state == RoundState.TURN:
-            self.update_turn(delta_time)
+            self.update_round(delta_time)
 
         elif round_state == RoundState.SHOWDOWN:
             self.update_showdown(delta_time)
