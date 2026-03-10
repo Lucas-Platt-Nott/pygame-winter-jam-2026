@@ -100,6 +100,7 @@ class PokerSystem:
             
         elif phase_state == PhaseState.NEXT_PHASE:
             self.opponent.hand.select_random()
+            self.opponent.hand.select_random()
             self.opponent.hand.discard_selected()
             self.state["phase"] = PhaseState.DRAW
 
