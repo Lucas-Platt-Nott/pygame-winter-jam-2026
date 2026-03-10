@@ -49,7 +49,7 @@ alagard = pygame.Font("assets/fonts/alagard.ttf", 64)
 alagard_small = pygame.Font("assets/fonts/alagard.ttf", 16)
 
 # Load text
-Images.register_image(render_outlined(alagard_large, "FROZEN\n FUNDS", (255, 255, 255), (1, 1, 1), 4), "title")
+Images.register_image(render_outlined(alagard_large, "FROZEN\n FUNDS", (255, 255, 255), (41, 51, 61), 4), "title")
 Images.register_image(render_outlined(alagard_small, "(Made for Pygame Winter Jam 2026 by ImNottL & Commando)", (125, 125, 125), (1, 1, 1), 1), "credits")
 
 Images.register_image(render_outlined(alagard, "Play", (255, 255, 255), (1, 1, 1), 4), "title-play-text")
@@ -66,13 +66,24 @@ Images.register_image(
 )
 
 poker_background = pygame.transform.scale(pygame.image.load(f"assets/images/poker_background.png"), SCREEN_SIZE)
-poker_background.fill((200, 200, 200), special_flags=pygame.BLEND_RGB_MULT)
+poker_background.fill((112, 112, 112), special_flags=pygame.BLEND_RGB_MULT)
 poker_background = pygame.transform.gaussian_blur(poker_background, 10)
 
 Images.register_image(
     poker_background,
     "poker-background"
 )
+
+borderless = pygame.transform.scale(pygame.image.load(f"assets/images/borderless_card.png"), CARD_SIZE)
+borderless = pygame.transform.grayscale(borderless)
+
+borderless.set_alpha(150)
+
+Images.register_image(
+    borderless,
+    "borderless_card"
+)
+
 
 # Load card images
 for file_path in os.listdir("assets/images/cards"):
@@ -82,5 +93,5 @@ for file_path in os.listdir("assets/images/cards"):
             CARD_SIZE
         ),
         file_path.split(".")[0],
-        colorkey=(0, 255, 0)
+        colorkey=(0, 255, 255)
     )

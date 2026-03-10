@@ -73,7 +73,7 @@ class Application:
         self.scene_manager.update(delta_time)
 
     def draw(self) -> None:
-        self.screen.fill((100, 100, 0))
+        self.screen.fill((100, 100, 100))
         self.scene_manager.draw(self.screen)
 
         pygame.display.flip()

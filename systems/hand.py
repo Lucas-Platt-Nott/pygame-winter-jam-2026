@@ -31,6 +31,7 @@ def lerp_angle(a, b, t):
     diff = (b - a + 180) % 360 - 180
     return a + diff * t
 
+
 class Hand:
     def __init__(self, position=(0, 0), hidden=False, flip=False) -> None:
         self._cards: list[Card] = []
@@ -59,11 +60,9 @@ class Hand:
     @property
     def num_cards(self) -> int:
         count = 0
-
         for card in self.cards:
             if card.type != "frozen":
                 count += 1
-
         return count
 
     def _compute_target(self, index: int, hand_size: int):
@@ -92,16 +91,10 @@ class Hand:
             card = self._cards[index]
             anim = self.anim_data[card]
 
-            # What is the current offset (how far up it is)?
             current_offset = anim.get("current_select_offset", 0.0)
-
-            # Toggle selection
             card.selected = not card.selected
-
-            # Target offset based on new state
             target_offset = -25 if card.selected else 0
 
-            # Reset selection animation
             anim["select_progress"] = 0.0
             anim["select_start_offset"] = current_offset
             anim["select_target_offset"] = target_offset
@@ -176,7 +169,6 @@ class Hand:
             surf = card.render().copy()
             surf = pygame.transform.rotate(surf, angle)
 
-            # Faster fade-out
             fade_t = min(1.0, t * 2.2)
             alpha = int(255 * (1 - fade_t))
             surf.set_alpha(alpha)
@@ -189,6 +181,8 @@ class Hand:
 
         if not self._cards:
             return
+
+        total = len(self._cards)
 
         # Draw normal cards
         for index, card in enumerate(self._cards):
@@ -213,20 +207,31 @@ class Hand:
             # Selection animation
             anim["select_progress"] = min(1.0, anim["select_progress"] + delta_time * 4.0)
             s_t = ease_in_out(anim["select_progress"])
-
-            start_off = anim.get("select_start_offset", 0.0)
-            target_off = anim.get("select_target_offset", 0.0)
-            offset = lerp(start_off, target_off, s_t)
-
+            offset = lerp(anim["select_start_offset"], anim["select_target_offset"], s_t)
             anim["current_select_offset"] = offset
 
             card.x = base_x
             card.y = base_y + offset
             card.angle = angle
 
-            # Draw card
+            # Draw card normally
             surf = Images.get_image("card_back") if self.is_hidden else card.render()
             self.surface.blit(surf, (card.x, card.y))
+
+            # --- FIXED TINT USING BLEND_RGB_MULT ---
+            depth = (total - 1) - index  # 0 = topmost
+            if depth > 0:
+                # Lerp tint between 255 (no tint) and ~215 (slightly darker)
+                tint_value = int(lerp(255, 215, min(1.0, depth * 0.25)))
+
+                tint = pygame.Surface(surf.get_size(), SRCALPHA)
+                tint.fill((tint_value, tint_value, tint_value))
+
+                self.surface.blit(
+                    tint,
+                    (card.x, card.y),
+                    special_flags=pygame.BLEND_RGB_MULT
+                )
 
             rect = pygame.Rect(card.x, card.y, surf.get_width(), surf.get_height())
             self.hitboxes.append(rect)
@@ -261,7 +266,6 @@ class Hand:
         anim["mode"] = "discard"
         anim["progress"] = 0.0
 
-        # Use the last drawn position (includes selection offset) so it doesn't snap
         discard_pos = anim.get("last_draw_pos", anim.get("last_base_pos", (card.x, card.y)))
         anim["discard_start_pos"] = discard_pos
         anim["discard_start_angle"] = anim["current_angle"]

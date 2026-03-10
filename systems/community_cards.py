@@ -53,7 +53,7 @@ class CommunityCards:
         # First: always draw 5 empty slots
         for i in range(5):
             x, y = self._compute_target(i)
-            surf = Images.get_image("empty_card")
+            surf = Images.get_image("borderless_card")
             self.surface.blit(surf, (x, y))
 
         # Then: draw actual cards (animated or placed) on top

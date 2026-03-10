@@ -30,33 +30,29 @@ class Title(Scene):
         self.time_elapsed = 0
         self.interval = 1/100
 
-        # Cache constants
         self.screen_w, self.screen_h = SCREEN_SIZE
         self.card_w, self.card_h = CARD_SIZE
 
-        # Cache background once
-        self.base_background = Images.get_image("title-background")
+        self.base_background = Images.get_image("poker-background")
         
     def start(self):
         self.intro_time_elapsed = 0
         self.cards.clear()
 
-        # Start BGM
         Sounds.get_sound("title-background").play(-1, -1, 500)
 
         for card_type in TYPES:
-            if card_type not in ["default"]:
+            if card_type not in ["frozen"]:
                 continue
 
             for suit in SUITS:
                 for rank in RANKS:
-                    if rank in ["J", "Q", "K", "A"]:
-                        continue
-
                     tint = random.randint(80, 140)
 
-                    # Use pre-rotated image
-                    card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_{suit}_{rank}"), random.randint(0, 180))
+                    card_image = pygame.transform.rotate(
+                        Images.get_image(f"{card_type}_{suit}_{rank}"),
+                        random.randint(0, 180)
+                    )
                     card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
  
                     card = AnimatedCard(
@@ -92,21 +88,16 @@ class Title(Scene):
                 (self.screen_h / 2 - self.title_h / 2) - offset
             )
 
-        # Update cards at fixed interval
         self.time_elapsed += delta_time
         if self.time_elapsed >= self.interval:
             for card in self.cards:
                 card.update(self.interval)
-
             self.time_elapsed = 0
 
         return super().update(delta_time)
 
     def draw(self, surface: pygame.Surface) -> None:
-        # Get credits
         credits = Images.get_image("credits")
-
-        # Copy cached background
         title_background = self.base_background.copy()
 
         for card in self.cards:
@@ -119,6 +110,7 @@ class Title(Scene):
     def stop(self):
         self.cards.clear()
 
+
 class AnimatedCard:
     def __init__(self, surface: pygame.Surface, center: pygame.Vector2, tint: int) -> None:
         self.image = surface
@@ -128,15 +120,14 @@ class AnimatedCard:
         self.tint = tint
 
         self.is_active = False
-        self.old_velocity = pygame.Vector2()
         self.velocity = pygame.Vector2()
+        self.old_velocity = pygame.Vector2()
 
-        self.separation_magnitude = 2.5
+        self.separation_magnitude = 5
         self.collide_radius = 100
-        self.friction = 5
-        self.falling_speed = 300
+        self.friction = 6
+        self.falling_speed = 150
 
-        # Cache half-size vector
         self.half_size = pygame.Vector2(self.width / 2, self.height / 2)
 
     def handle_motion(self, mouse_pos: pygame.Vector2) -> None:
@@ -144,12 +135,24 @@ class AnimatedCard:
         dist_mag = distance.length()
 
         if dist_mag < self.collide_radius:
+
+            # Dead zone to prevent jitter when mouse crosses centre
+            if dist_mag < 10:
+                return
+
             self.is_active = True
             self.old_velocity = self.velocity
 
-            # Avoid repeated magnitude/normalize calls
-            push = distance.normalize() * (self.collide_radius - dist_mag)
-            self.velocity = (push * self.separation_magnitude + self.old_velocity) / 2
+            # Safe normalize
+            direction = distance / dist_mag
+
+            # Smooth falloff (keeps original feel but removes choppy flip)
+            strength = (self.collide_radius - dist_mag)
+            strength *= 0.8  # soften the force slightly
+
+            push = direction * strength * self.separation_magnitude
+
+            self.velocity = (push + self.old_velocity) / 2
 
     def update(self, delta_time: float) -> None:
         self.center.y += self.falling_speed * delta_time
@@ -167,6 +170,7 @@ class AnimatedCard:
             return
 
         vel_mag = self.velocity.length()
+
         if vel_mag > 2:
             self.velocity -= (self.friction * 9.8 * delta_time) * (self.velocity / vel_mag)
         else:

@@ -30,6 +30,6 @@ if __name__ == "__main__":
 
     application.add_scene(Poker, "poker")
     application.add_scene(Title, "title")
-    application.set_scene("poker")
+    application.set_scene("title")
 
     asyncio.run(application.start())
