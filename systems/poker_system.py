@@ -54,9 +54,6 @@ class PokerSystem:
                 if self.player.hand.num_cards <= 2:
                     self.state["phase"] = PhaseState.NEXT_PHASE
 
-            elif key == K_0:
-                self.community_cards.add(self.deck.draw_card())
-
     # PRE-FLOP
     def update_preflop(self, delta_time: float) -> None:
         phase_state = self.state["phase"]
@@ -75,7 +72,7 @@ class PokerSystem:
             self.opponent.hand.select_random()
             self.opponent.hand.select_random()
             self.opponent.hand.discard_selected()
-            
+
             self.state["phase"] = PhaseState.DRAW
             self.state["round"] = RoundState.FLOP
             

@@ -174,7 +174,12 @@ class Hand:
             base_x, base_y = anim["discard_start_pos"]
             angle = lerp_angle(anim["discard_start_angle"], anim["discard_end_angle"], t)
 
-            surf = card.render().copy()
+            if self.is_hidden:
+                surf = Images.get_image("card_back")
+
+            else:
+                surf = card.render().copy()
+                
             surf = pygame.transform.rotate(surf, angle)
 
             fade_t = min(1.0, t * 2.2)
