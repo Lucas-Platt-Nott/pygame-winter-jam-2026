@@ -266,6 +266,14 @@ class Hand:
             anim["progress"] = 0.0
             anim["mode"] = "lerp"
 
+    def freeze_selected(self) -> None:
+        for card in self.get_selected_cards():
+            self.select(self.cards.index(card))
+            
+            if card.type == "default":
+                card.type = "frozen"
+                card.update_image()
+
     def remove(self, card: Card) -> None:
         if card not in self._cards:
             return

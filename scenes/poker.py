@@ -26,7 +26,7 @@ class Poker(Scene):
 
     def update(self, delta_time: float) -> None:
         self.system.update(delta_time)
-        self.renderer.update(delta_time)
+        self.renderer.update(delta_time, self.system)
 
     def draw(self, surface: pygame.Surface) -> None:
         self.renderer.draw(surface, self.system)

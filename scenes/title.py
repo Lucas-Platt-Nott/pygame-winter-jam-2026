@@ -33,38 +33,26 @@ class Title(Scene):
         self.screen_w, self.screen_h = SCREEN_SIZE
         self.card_w, self.card_h = CARD_SIZE
 
-        self.base_background = Images.get_image("poker-background")
-        
     def start(self):
         self.intro_time_elapsed = 0
         self.cards.clear()
 
         Sounds.get_sound("title-background").play(-1, -1, 500)
+                    
+        for i in range(52):
+            self.new_card()
 
-        for card_type in TYPES:
-            if card_type not in ["frozen"]:
-                continue
+    def new_card(self):
+        card_type = "default" #random.choice(TYPES)
+        suit = random.choice(SUITS)
+        rank = random.choice(RANKS)
+        tint = random.randint(80, 140)
 
-            for suit in SUITS:
-                for rank in RANKS:
-                    tint = random.randint(80, 140)
+        card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_{suit}_{rank}"), random.randint(0, 180))
+        card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
 
-                    card_image = pygame.transform.rotate(
-                        Images.get_image(f"{card_type}_{suit}_{rank}"),
-                        random.randint(0, 180)
-                    )
-                    card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
- 
-                    card = AnimatedCard(
-                        card_image,
-                        pygame.Vector2(
-                            random.randint(0, self.screen_w - self.card_w // 2),
-                            random.randint(-self.card_h, self.screen_h - self.card_h // 2)
-                        ),
-                        tint
-                    )
-                    self.cards.append(card)
-
+        card = AnimatedCard(card_image, pygame.Vector2(random.randint(0, self.screen_w - self.card_w // 2), -self.card_h // 2 - random.randint(0, self.screen_h)), tint)
+        self.cards.append(card)
         self.cards.sort(key=lambda card: card.tint)
 
     def handle_event(self, event: pygame.Event) -> None:
@@ -72,6 +60,9 @@ class Title(Scene):
             mouse_pos = pygame.Vector2(event.pos)
             for card in self.cards:
                 card.handle_motion(mouse_pos)
+
+        elif event.type == KEYDOWN:
+            self.scene_manager.set_scene("poker")
 
     def update(self, delta_time: float) -> None:
         self.intro_time_elapsed += delta_time
@@ -92,18 +83,21 @@ class Title(Scene):
         if self.time_elapsed >= self.interval:
             for card in self.cards:
                 card.update(self.time_elapsed)
+
+                if card.clear:
+                    self.cards.remove(card)
+                    self.new_card()
+
             self.time_elapsed = 0
 
         return super().update(delta_time)
 
     def draw(self, surface: pygame.Surface) -> None:
         credits = Images.get_image("credits")
-        title_background = self.base_background.copy()
 
         for card in self.cards:
-            card.draw(title_background)
+            card.draw(surface)
 
-        surface.blit(title_background)
         surface.blit(credits, (SCREEN_SIZE[0] / 2 - credits.width / 2, 0))
         surface.blit(self.title_image, self.title_position)
 
@@ -119,6 +113,7 @@ class AnimatedCard:
         self.center = center
         self.tint = tint
 
+        self.clear = False
         self.is_active = False
         self.velocity = pygame.Vector2()
         self.old_velocity = pygame.Vector2()
@@ -158,8 +153,7 @@ class AnimatedCard:
         self.center.y += self.falling_speed * delta_time
 
         if self.center.y - self.height / 2 > SCREEN_SIZE[1]:
-            self.center.x = random.randint(0, SCREEN_SIZE[0] - self.width // 2)
-            self.center.y = -self.height / 2
+            self.clear = True
 
         if self.center.x < -self.width:
             self.center.x = SCREEN_SIZE[0] + self.width / 2

@@ -26,10 +26,14 @@ class PhaseState(Enum):
     FREEZE = auto()
     DISCARD = auto()
     NEXT_PHASE = auto()
+    HAND_SELECTION = auto()
+    EVALUATION = auto()
+    SHOWDOWN = auto()
 
 # Poker System Class
 class PokerSystem:
     def __init__(self, player: Player, opponent: PokerPlayer):
+        self.tutorial_enabled = True
         self.deck = Deck(["default"], SUITS, RANKS)
         self.community_cards = CommunityCards()
         self.player = player
@@ -41,18 +45,36 @@ class PokerSystem:
         }
 
     def handle_event(self, event: pygame.Event) -> None:
-        if event.type == MOUSEBUTTONDOWN and self.state["phase"] == PhaseState.DISCARD:
+        if event.type == MOUSEBUTTONDOWN and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE]:
             self.player.hand.handle_click(event)
 
         elif event.type == KEYDOWN:
+            nums = [K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9]
             key = event.dict["key"]
 
-            # PLACEHOLDER DISCARD LOGIC BEFORE UI IS IMPLEMENTED
             if key == K_RETURN:
-                self.player.hand.discard_selected()
+                if self.state["phase"] == PhaseState.DISCARD:
+                    self.player.hand.discard_selected()
 
-                if self.player.hand.num_cards <= 2:
-                    self.state["phase"] = PhaseState.NEXT_PHASE
+                    if self.player.hand.num_cards <= 2:
+                        self.state["phase"] = PhaseState.NEXT_PHASE
+
+                elif self.state["phase"] == PhaseState.FREEZE:
+                    self.player.hand.freeze_selected()
+                    self.state["phase"] = PhaseState.DISCARD
+
+                elif self.state["phase"] == PhaseState.DRAW and self.state["round"] != RoundState.PRE_FLOP:
+                    self.state["phase"] = PhaseState.DRAWING
+
+                    if self.state["round"] != RoundState.SHOWDOWN:
+                        self.player.queue_draw(2)
+                        self.opponent.queue_draw(2)
+
+            elif key in nums and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE]:
+                index = nums.index(key)
+
+                if index < len(self.player.hand.cards):
+                    self.player.hand.select(index)
 
     # PRE-FLOP
     def update_preflop(self, delta_time: float) -> None:
@@ -65,7 +87,7 @@ class PokerSystem:
             self.state["phase"] = PhaseState.DRAWING
 
         elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
-            self.state["phase"] = PhaseState.DISCARD
+            self.state["phase"] = PhaseState.FREEZE
 
         elif phase_state == PhaseState.NEXT_PHASE:
             self.opponent.hand.select_random()
@@ -75,28 +97,20 @@ class PokerSystem:
 
             self.state["phase"] = PhaseState.DRAW
             self.state["round"] = RoundState.FLOP
-            
+
+            for i in range(3):
+                self.community_cards.add(self.deck.draw_card())
+
     # FLOP / RIVER / TURN
     def update_round(self, delta_time: float) -> None:
         phase_state = self.state["phase"]
         round_state = self.state["round"]
 
-        n = 3 if round_state == RoundState.FLOP else 1
-
-        if phase_state == PhaseState.DRAW:
-            for i in range(n):
-                self.community_cards.add(self.deck.draw_card())
-
-            self.player.queue_draw(2)
-            self.opponent.queue_draw(2)
-
-            self.state["phase"] = PhaseState.DRAWING
-
-        elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
+        if phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
             self.state["phase"] = PhaseState.BET
 
         elif phase_state == PhaseState.BET:
-            self.state["phase"] = PhaseState.DISCARD
+            self.state["phase"] = PhaseState.FREEZE
             
         elif phase_state == PhaseState.NEXT_PHASE:
             self.opponent.hand.select_random()
@@ -112,15 +126,26 @@ class PokerSystem:
 
             elif round_state == RoundState.TURN:
                 self.state["round"] = RoundState.SHOWDOWN
+                self.state["phase"] = PhaseState.HAND_SELECTION
 
-            print(round_state)
+            self.community_cards.add(self.deck.draw_card())
 
     # SHOWDOWN
     def update_showdown(self, delta_time: float) -> None:
         phase_state = self.state["phase"]
 
+        if phase_state == PhaseState.HAND_SELECTION:
+            pass
+        
+        elif phase_state == PhaseState.EVALUATION:
+            pass
+
+        elif phase_state == PhaseState.SHOWDOWN:
+            pass
+        
     def update(self, delta_time: float) -> None:
         round_state = self.state["round"]
+        print(round_state)
 
         self.player.update(self.deck, delta_time)
         self.opponent.update(self.deck, delta_time)

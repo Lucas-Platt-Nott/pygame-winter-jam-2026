@@ -26,6 +26,10 @@ class Card:
     def name(self) -> str:
         return f"{self.type}_{self.suit}_{self.rank}"
 
+    def update_image(self) -> None:
+        self._rotation_cache = {}
+        self._base_surface = None
+
     def _get_base_surface(self):
         if self._base_surface is None:
             self._base_surface = Images.get_image(self.name)
