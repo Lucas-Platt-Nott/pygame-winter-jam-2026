@@ -32,4 +32,5 @@ if __name__ == "__main__":
     application.add_scene(Title, "title")
     application.set_scene("poker")
 
+    # Run application
     asyncio.run(application.start())

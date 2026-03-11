@@ -59,31 +59,38 @@ Images.register_image(render_outlined(alagard, "Quit", (255, 255, 255), (1, 1, 1
 # Load images
 title_background = pygame.Surface(SCREEN_SIZE)
 title_background.fill((10, 10, 20))
+Images.register_image(title_background, "title-background")
 
-Images.register_image(
-    title_background,
-    "title-background"
-)
+# --- Load Poker Background ---
+poker_background = pygame.transform.scale(
+    pygame.image.load("assets/images/background.png"),
+    (int(SCREEN_SIZE[0] * 1.2), int(SCREEN_SIZE[0] * 1.2))
+).convert_alpha()
 
-poker_background = pygame.transform.scale(pygame.image.load(f"assets/images/poker_background.png"), SCREEN_SIZE)
-poker_background.fill((112, 112, 112), special_flags=pygame.BLEND_RGB_MULT)
+poker_background.fill((70, 70, 70), special_flags=pygame.BLEND_RGB_MULT)
 poker_background = pygame.transform.gaussian_blur(poker_background, 10)
 
-Images.register_image(
-    poker_background,
-    "poker-background"
-)
+Images.register_image(poker_background, "poker-background")
 
-borderless = pygame.transform.scale(pygame.image.load(f"assets/images/borderless_card.png"), CARD_SIZE)
+# --- Precache Rotations (0–359°) ---
+print("Precaching poker background rotations...")
+
+for angle in range(360):
+    rotated = pygame.transform.rotozoom(poker_background, angle, 1).convert_alpha()
+    Images.register_image(rotated, f"poker-background-{angle}")
+
+print("Rotation precache complete.")
+
+# Load borderless card
+borderless = pygame.transform.scale(
+    pygame.image.load("assets/images/borderless_card.png"),
+    CARD_SIZE
+).convert_alpha()
+
 borderless = pygame.transform.grayscale(borderless)
-
 borderless.set_alpha(150)
 
-Images.register_image(
-    borderless,
-    "borderless_card"
-)
-
+Images.register_image(borderless, "borderless_card")
 
 # Load card images
 for file_path in os.listdir("assets/images/cards"):
@@ -91,7 +98,7 @@ for file_path in os.listdir("assets/images/cards"):
         pygame.transform.scale(
             pygame.image.load(f"assets/images/cards/{file_path}"),
             CARD_SIZE
-        ),
+        ).convert_alpha(),
         file_path.split(".")[0],
         colorkey=(0, 255, 255)
     )
