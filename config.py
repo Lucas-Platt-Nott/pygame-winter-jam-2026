@@ -18,6 +18,9 @@ with open("data/hands.json", "r") as file:
     HAND_DATA = json.load(file)
 
 
+# Other
+FPS = 60
+
 # Sizes
 ANIM_SPEED = 1.5
 SCREEN_SIZE = (1024, 576)

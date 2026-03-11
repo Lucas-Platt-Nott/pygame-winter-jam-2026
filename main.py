@@ -7,7 +7,7 @@ from pygame.locals import *
 
 # Internal
 from core import Application
-from config import SCREEN_SIZE
+from config import *
 from scenes import *
 from systems import Player
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     pygame.mixer.init()
 
     # Initialise game
-    application = FrozenFunds(SCREEN_SIZE)
+    application = FrozenFunds(SCREEN_SIZE, fps=FPS)
 
     application.add_scene(Poker, "poker")
     application.add_scene(Title, "title")

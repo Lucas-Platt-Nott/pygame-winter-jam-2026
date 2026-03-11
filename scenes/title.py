@@ -28,7 +28,7 @@ class Title(Scene):
         )
 
         self.time_elapsed = 0
-        self.interval = 1/100
+        self.interval = 0
 
         self.screen_w, self.screen_h = SCREEN_SIZE
         self.card_w, self.card_h = CARD_SIZE
@@ -59,7 +59,7 @@ class Title(Scene):
                         card_image,
                         pygame.Vector2(
                             random.randint(0, self.screen_w - self.card_w // 2),
-                            random.randint(0, self.screen_h - self.card_h // 2)
+                            random.randint(-self.card_h, self.screen_h - self.card_h // 2)
                         ),
                         tint
                     )
@@ -91,7 +91,7 @@ class Title(Scene):
         self.time_elapsed += delta_time
         if self.time_elapsed >= self.interval:
             for card in self.cards:
-                card.update(self.interval)
+                card.update(self.time_elapsed)
             self.time_elapsed = 0
 
         return super().update(delta_time)
