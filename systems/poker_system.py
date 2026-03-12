@@ -87,7 +87,7 @@ class PokerSystem:
             self.state["phase"] = PhaseState.DRAWING
 
         elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
-            self.state["phase"] = PhaseState.FREEZE
+            self.state["phase"] = PhaseState.DISCARD
 
         elif phase_state == PhaseState.NEXT_PHASE:
             self.opponent.hand.select_random()
@@ -110,12 +110,17 @@ class PokerSystem:
             self.state["phase"] = PhaseState.BET
 
         elif phase_state == PhaseState.BET:
+            if random.random() > 0.5:
+                self.opponent.hand.select_random()
+                self.opponent.hand.freeze_selected()
+
             self.state["phase"] = PhaseState.FREEZE
             
         elif phase_state == PhaseState.NEXT_PHASE:
-            self.opponent.hand.select_random()
-            self.opponent.hand.select_random()
-            self.opponent.hand.discard_selected()
+            while self.opponent.hand.num_cards > 2:
+                self.opponent.hand.select_random()
+                self.opponent.hand.discard_selected()
+                
             self.state["phase"] = PhaseState.DRAW
 
             if round_state == RoundState.FLOP:
