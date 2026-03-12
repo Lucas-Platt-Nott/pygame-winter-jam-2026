@@ -2,6 +2,7 @@
 import pygame
 
 # Internal
+from assets import Sounds
 from config import *
 from systems import Deck, Hand
 
@@ -33,6 +34,7 @@ class PokerPlayer:
             self.time_elapsed = 0
             self.cards_to_draw -= 1
             self.draw_cards(deck, 1)
+            Sounds.get_sound("card_draw").play()
 
         elif self.cards_to_draw > 0:
             self.time_elapsed += delta_time

@@ -21,6 +21,9 @@ class Poker(Scene):
         self.player.reset()
         self.system = PokerSystem(self.player, PokerPlayer())
 
+        Sounds.get_sound("background_music").play(-1, -1, 5000)
+
+
     def handle_event(self, event: pygame.Event) -> None:
         self.system.handle_event(event)
 

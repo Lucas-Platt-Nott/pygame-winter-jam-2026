@@ -46,7 +46,11 @@ class PokerSystem:
 
     def handle_event(self, event: pygame.Event) -> None:
         if event.type == MOUSEBUTTONDOWN and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE]:
+            selected = self.player.hand.get_selected_cards()
             self.player.hand.handle_click(event)
+
+            if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
+                self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
         elif event.type == KEYDOWN:
             nums = [K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9]
@@ -66,16 +70,25 @@ class PokerSystem:
                 elif self.state["phase"] == PhaseState.DRAW and self.state["round"] != RoundState.PRE_FLOP:
                     self.state["phase"] = PhaseState.DRAWING
 
-                    if self.state["round"] != RoundState.SHOWDOWN:
+                    if self.state["round"] not in [RoundState.SHOWDOWN, RoundState.TURN]:
                         self.player.queue_draw(2)
                         self.opponent.queue_draw(2)
 
-            elif key in nums and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE]:
+                    elif self.state["round"] == RoundState.TURN:
+                        self.state["phase"] = PhaseState.NEXT_PHASE
+
+            elif key in nums and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE, PhaseState.HAND_SELECTION]:
+                selected = self.player.hand.get_selected_cards()
                 index = nums.index(key)
 
                 if index < len(self.player.hand.cards):
                     self.player.hand.select(index)
 
+                if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
+                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
+
+                elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
+                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
     # PRE-FLOP
     def update_preflop(self, delta_time: float) -> None:
         phase_state = self.state["phase"]

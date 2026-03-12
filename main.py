@@ -18,7 +18,7 @@ class FrozenFunds(Application):
         super().__init__(screen_size, flags, fps)
         self.player = Player()
 
-        self.background = Images.get_image("poker-background")
+        self.background = Images.get_image("poker_background")
         self.rotated = self.background.copy()
         self.rotate_interval = 0.06
         self.angle = 0

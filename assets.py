@@ -40,7 +40,12 @@ Images = ImageManager()
 Sounds = SoundManager()
 
 # Load sounds
-Sounds.load_sound("assets/sounds/title-bgm.wav", "title-background")
+Sounds.load_sound("assets/sounds/title_music.wav", "title_music")
+Sounds.load_sound("assets/sounds/background_music.wav", "background_music")
+Sounds.load_sound("assets/sounds/card_discard.wav", "card_discard")
+Sounds.load_sound("assets/sounds/card_draw.wav", "card_draw")
+Sounds.load_sound("assets/sounds/card_freeze.wav", "card_freeze")
+Sounds.load_sound("assets/sounds/card_select.wav", "card_select")
 
 # Load fonts
 pygame.font.init()
@@ -51,6 +56,7 @@ alagard_small = pygame.Font("assets/fonts/alagard.ttf", 16)
 # Load text
 Images.register_image(render_outlined(alagard_large, "FROZEN\n FUNDS", (255, 255, 255), (41, 51, 61), 4), "title")
 Images.register_image(render_outlined(alagard_small, "(Made for Pygame Winter Jam 2026 by ImNottL & Commando)", (125, 125, 125), (1, 1, 1), 1), "credits")
+Images.register_image(render_outlined(alagard, "[Press Enter to Play]", (175, 175, 175), (1, 1, 1), 1), "title_prompt")
 
 # Draw prompts
 Images.register_image(render_outlined(alagard_small, "Cards are dealt at the start of each phase:", (125, 125, 125), (1, 1, 1), 1), "DRAWING_top")
@@ -64,22 +70,21 @@ Images.register_image(render_outlined(alagard_small, "Would you like to raise th
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Place Bet]", (125, 125, 125), (1, 1, 1), 1), "BET_bot")
 
 # Freeze prompts
-Images.register_image(render_outlined(alagard_small, "        Select one Regular Card to Freeze\nThe Frozen Card will no longer be discarded.", (125, 125, 125), (1, 1, 1), 1), "FREEZE_top")
+Images.register_image(render_outlined(alagard_small, "                    Select up to one Regular Card to Freeze \n                      (Thawed after an attempted Discard)\n  The Card gains 1x discard protection but -1 value when scored.", (125, 125, 125), (1, 1, 1), 1), "FREEZE_top")
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Freeze Selected]", (125, 125, 125), (1, 1, 1), 1), "FREEZE_bot")
 
 # Discard prompts
 Images.register_image(render_outlined(alagard_small, "Discard until you have no more than 2 Regular Cards.\n     (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (1, 1, 1), 1), "DISCARD_top")
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Discard Selected]", (125, 125, 125), (1, 1, 1), 1), "DISCARD_bot")
 
+# Hand Selection prompts
+Images.register_image(render_outlined(alagard_small, "Select up to 5 cards to build the best poker hand you can to beat your opponent.\n(Community Cards are automatically applied, ALL Played Cards will be discarded)", (125, 125, 125), (1, 1, 1), 1), "HAND_SELECTION_top")
+Images.register_image(render_outlined(alagard_small, "[Press Enter to Submit Selected Hand]", (125, 125, 125), (1, 1, 1), 1), "HAND_SELECTION_bot")
+
 # Keybind prompt(s)
 Images.register_image(render_outlined(alagard_small, "1-9: Select card at Position\nENTER: Confirm selection", (200, 200, 200), (1, 1, 1), 1), "input_prompt")
 
 # Load images
-title_background = pygame.Surface(SCREEN_SIZE)
-title_background.fill((10, 10, 20))
-Images.register_image(title_background, "title-background")
-
-# --- Load Poker Background ---
 poker_background = pygame.transform.scale(
     pygame.image.load("assets/images/background.png"),
     (int(SCREEN_SIZE[0] * 1.2), int(SCREEN_SIZE[0] * 1.2))
@@ -87,8 +92,17 @@ poker_background = pygame.transform.scale(
 
 poker_background.fill((70, 70, 70), special_flags=pygame.BLEND_RGB_MULT)
 poker_background = pygame.transform.gaussian_blur(poker_background, 10)
+Images.register_image(poker_background, "poker_background")
 
-Images.register_image(poker_background, "poker-background")
+title_background = pygame.transform.scale(
+    pygame.image.load("assets/images/title_background.png"),
+    (int(SCREEN_SIZE[0] * 1.2), int(SCREEN_SIZE[0] * 1.2))
+).convert()
+
+title_background.fill((40, 40, 40), special_flags=pygame.BLEND_RGB_MULT)
+title_background = pygame.transform.gaussian_blur(title_background, 10)
+Images.register_image(title_background, "title_background")
+
 
 # Load borderless card
 borderless = pygame.transform.scale(

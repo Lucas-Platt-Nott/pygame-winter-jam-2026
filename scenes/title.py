@@ -1,5 +1,6 @@
 # Built-In
 import random
+import math
 
 # External
 import pygame
@@ -9,100 +10,6 @@ from pygame.locals import *
 from assets import Images, Sounds
 from core import SceneManager, Scene, Button
 from config import *
-
-class Title(Scene):
-    def __init__(self, scene_manager: SceneManager, player) -> None:
-        self.scene_manager = scene_manager
-        self.cards: list[AnimatedCard] = []
-
-        self.width = SCREEN_SIZE[0] / 2
-        self.intro_time_elapsed = 0
-        self.alpha = 0
-
-        self.title_image = Images.get_image("title")
-        self.title_w = self.title_image.width
-        self.title_h = self.title_image.height
-        self.title_position = (
-            (SCREEN_SIZE[0] - self.title_w) / 2,
-            SCREEN_SIZE[1] / 2 - self.title_h / 2
-        )
-
-        self.time_elapsed = 0
-        self.interval = 0
-
-        self.screen_w, self.screen_h = SCREEN_SIZE
-        self.card_w, self.card_h = CARD_SIZE
-
-    def start(self):
-        self.intro_time_elapsed = 0
-        self.cards.clear()
-
-        Sounds.get_sound("title-background").play(-1, -1, 500)
-                    
-        for i in range(52):
-            self.new_card()
-
-    def new_card(self):
-        card_type = "default" #random.choice(TYPES)
-        suit = random.choice(SUITS)
-        rank = random.choice(RANKS)
-        tint = random.randint(80, 140)
-
-        card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_{suit}_{rank}"), random.randint(0, 180))
-        card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
-
-        card = AnimatedCard(card_image, pygame.Vector2(random.randint(0, self.screen_w - self.card_w // 2), -self.card_h // 2 - random.randint(0, self.screen_h)), tint)
-        self.cards.append(card)
-        self.cards.sort(key=lambda card: card.tint)
-
-    def handle_event(self, event: pygame.Event) -> None:
-        if event.type == MOUSEMOTION:
-            mouse_pos = pygame.Vector2(event.pos)
-            for card in self.cards:
-                card.handle_motion(mouse_pos)
-
-        elif event.type == KEYDOWN:
-            self.scene_manager.set_scene("poker")
-
-    def update(self, delta_time: float) -> None:
-        self.intro_time_elapsed += delta_time
-
-        if self.intro_time_elapsed < 1.5:
-            self.alpha = 255 * (self.intro_time_elapsed / 1.5)
-            self.title_image.set_alpha(self.alpha)
-
-        elif 2.5 < self.intro_time_elapsed < 3.5:
-            t = (self.intro_time_elapsed - 2.5)
-            offset = (self.screen_h / 2 - self.title_h / 2) * 0.8 * t
-            self.title_position = (
-                (self.screen_w - self.title_w) / 2,
-                (self.screen_h / 2 - self.title_h / 2) - offset
-            )
-
-        self.time_elapsed += delta_time
-        if self.time_elapsed >= self.interval:
-            for card in self.cards:
-                card.update(self.time_elapsed)
-
-                if card.clear:
-                    self.cards.remove(card)
-                    self.new_card()
-
-            self.time_elapsed = 0
-
-        return super().update(delta_time)
-
-    def draw(self, surface: pygame.Surface) -> None:
-        credits = Images.get_image("credits")
-
-        for card in self.cards:
-            card.draw(surface)
-
-        surface.blit(credits, (SCREEN_SIZE[0] / 2 - credits.width / 2, 0))
-        surface.blit(self.title_image, self.title_position)
-
-    def stop(self):
-        self.cards.clear()
 
 
 class AnimatedCard:
@@ -175,3 +82,121 @@ class AnimatedCard:
 
     def draw(self, surface: pygame.Surface):
         surface.blit(self.image, self.center - self.half_size)
+
+class Title(Scene):
+    def __init__(self, scene_manager: SceneManager, player) -> None:
+        self.scene_manager = scene_manager
+        self.cards: list[AnimatedCard] = []
+
+        self.width = SCREEN_SIZE[0] / 2
+        self.intro_time_elapsed = 0
+        self.alpha = 0
+        self.original_prompt = Images.get_image("title_prompt")
+        self.prompt = Images.get_image("title_prompt")
+        self.title_image = Images.get_image("title")
+        self.title_w = self.title_image.width
+        self.title_h = self.title_image.height
+        self.title_position = (
+            (SCREEN_SIZE[0] - self.title_w) / 2,
+            SCREEN_SIZE[1] / 2 - self.title_h / 2
+        )
+
+        self.time_elapsed = 0
+        self.animation_time = 0
+        self.interval = 0
+
+        self.screen_w, self.screen_h = SCREEN_SIZE
+        self.card_w, self.card_h = CARD_SIZE
+
+    def start(self):
+        self.intro_time_elapsed = 0
+        self.cards.clear()
+
+        Sounds.get_sound("title_music").play(-1, -1, 500)
+                    
+        for i in range(52):
+            self.spawn_card()
+
+    def spawn_card(self):
+        card_type = random.choice(TYPES)
+        suit = random.choice(SUITS)
+        rank = random.choice(RANKS)
+        tint = random.randint(80, 140)
+
+        card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_{suit}_{rank}"), random.randint(0, 180))
+        card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
+
+        card = AnimatedCard(card_image, pygame.Vector2(random.randint(0, self.screen_w - self.card_w // 2), random.randint(-self.screen_h, self.screen_h)), tint)
+        self.cards.append(card)
+        self.cards.sort(key=lambda card: card.tint)
+
+    def new_card(self):
+        card_type = random.choice(TYPES)
+        suit = random.choice(SUITS)
+        rank = random.choice(RANKS)
+        tint = random.randint(80, 140)
+
+        card_image = pygame.transform.rotate(Images.get_image(f"{card_type}_{suit}_{rank}"), random.randint(0, 180))
+        card_image.fill((tint, tint, tint), special_flags=BLEND_RGB_MULT)
+
+        card = AnimatedCard(card_image, pygame.Vector2(random.randint(0, self.screen_w - self.card_w // 2), random.randint(-self.screen_h, -self.card_h // 2)), tint)
+        self.cards.append(card)
+        self.cards.sort(key=lambda card: card.tint)
+
+    def handle_event(self, event: pygame.Event) -> None:
+        if event.type == MOUSEMOTION:
+            mouse_pos = pygame.Vector2(event.pos)
+            for card in self.cards:
+                card.handle_motion(mouse_pos)
+
+        elif event.type == KEYDOWN:
+            self.scene_manager.set_scene("poker")
+
+    def update(self, delta_time: float) -> None:
+        # self.intro_time_elapsed += delta_time
+
+        # if self.intro_time_elapsed < 1.5:
+        #     self.alpha = 255 * (self.intro_time_elapsed / 1.5)
+        #     self.title_image.set_alpha(self.alpha)
+
+        # elif 2.5 < self.intro_time_elapsed < 3.5:
+        #     t = (self.intro_time_elapsed - 2.5)
+        #     offset = (self.screen_h / 2 - self.title_h / 2) * 0.8 * t
+        #     self.title_position = (
+        #         (self.screen_w - self.title_w) / 2,
+        #         (self.screen_h / 2 - self.title_h / 2) - offset
+        #     )
+
+        self.time_elapsed += delta_time
+        self.animation_time += delta_time
+        hue = (455 / 2) + (55 / 2) * math.cos(5 * self.animation_time)
+        self.prompt = self.original_prompt.copy()
+        self.prompt.fill((hue, hue, hue), special_flags=BLEND_RGB_MULT)
+
+        if self.time_elapsed >= self.interval:
+            for card in self.cards:
+                card.update(self.time_elapsed)
+
+                if card.clear:
+                    self.cards.remove(card)
+                    self.new_card()
+
+            self.time_elapsed = 0
+
+        return super().update(delta_time)
+
+    def draw(self, surface: pygame.Surface) -> None:
+        bg = Images.get_image("title_background")
+        surface.blit(bg, (0, 0))
+        credits = Images.get_image("credits")
+
+        for card in self.cards:
+            card.draw(surface)
+
+        surface.blit(credits, (SCREEN_SIZE[0] / 2 - credits.width / 2, 0))
+        surface.blit(self.prompt, (SCREEN_SIZE[0] / 2 - self.prompt.width / 2, SCREEN_SIZE[1] * 0.9 - self.prompt.height))
+        surface.blit(self.title_image, self.title_position)
+
+    def stop(self):
+        self.cards.clear()
+        Sounds.get_sound("title_music").fadeout(500)

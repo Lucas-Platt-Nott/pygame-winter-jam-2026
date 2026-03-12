@@ -9,7 +9,7 @@ from pygame.locals import *
 # Internal
 from config import *
 from systems import Card
-from assets import Images
+from assets import Images, Sounds
 
 
 def cubic_bezier(t, p0, p1, p2, p3):
@@ -93,6 +93,9 @@ class Hand:
 
             current_offset = anim.get("current_select_offset", 0.0)
             card.selected = not card.selected
+            if card.selected:
+                Sounds.get_sound("card_select").play()
+
             target_offset = -25 if card.selected else 0
 
             anim["select_progress"] = 0.0
@@ -229,22 +232,18 @@ class Hand:
 
             # Draw card normally
             surf = Images.get_image("card_back") if self.is_hidden else card.render()
-            self.surface.blit(surf, (card.x, card.y))
-
-            # --- FIXED TINT USING BLEND_RGB_MULT ---
             depth = (total - 1) - index  # 0 = topmost
             if depth > 0:
                 # Lerp tint between 255 (no tint) and ~215 (slightly darker)
-                tint_value = int(lerp(255, 215, min(1.0, depth * 0.25)))
+                tint_value = 255
 
                 tint = pygame.Surface(surf.get_size(), SRCALPHA)
-                tint.fill((tint_value, tint_value, tint_value))
+                surf.fill((tint_value, tint_value, tint_value), special_flags=BLEND_RGB_MULT)
 
-                self.surface.blit(
-                    tint,
-                    (card.x, card.y),
-                    special_flags=pygame.BLEND_RGB_MULT
-                )
+            self.surface.blit(surf, (card.x, card.y))
+
+            # --- FIXED TINT USING BLEND_RGB_MULT ---
+           
 
             rect = pygame.Rect(card.x, card.y, surf.get_width(), surf.get_height())
             self.hitboxes.append(rect)
@@ -266,6 +265,8 @@ class Hand:
             anim["progress"] = 0.0
             anim["mode"] = "lerp"
 
+        Sounds.get_sound("card_discard").play()
+
     def freeze_selected(self) -> None:
         for card in self.get_selected_cards():
             self.select(self.cards.index(card))
@@ -273,6 +274,8 @@ class Hand:
             if card.type == "default":
                 card.type = "frozen"
                 card.update_image()
+
+        Sounds.get_sound("card_freeze").play()
 
     def remove(self, card: Card) -> None:
         if card not in self._cards:
