@@ -34,6 +34,43 @@ class HandCalculator:
                 total_value += self.values[card.rank] + 1
 
         multiplier = self.hand_values[best_hand_name]
+        hand.value = total_value * multiplier
+        hand.hand_type = best_hand_name
+        return total_value * multiplier
+
+    # ---------------------------------------------------------
+    # AI: GET OPTIMAL SELECTIONS
+    # ---------------------------------------------------------
+    def get_optimal_selections(self, hand, community_cards):
+        best_score = -1
+        best_selection = []
+
+        # Try all non-empty subsets of the hand
+        for r in range(1, len(hand.cards) + 1):
+            for subset in combinations(hand.cards, r):
+                score = self._simulate_selection(subset, community_cards)
+                if score > best_score:
+                    best_score = score
+                    best_selection = list(subset)
+
+        return best_selection
+
+    # ---------------------------------------------------------
+    # INTERNAL: SIMULATE A SELECTION WITHOUT MODIFYING HAND
+    # ---------------------------------------------------------
+    def _simulate_selection(self, selected_cards, community_cards):
+        cards = list(selected_cards) + community_cards.cards
+        best_hand_name, best_hand_cards = self._evaluate_best_hand(cards)
+
+        # Score only contributing cards
+        total_value = 0
+        for card in best_hand_cards:
+            if card.type == "default":
+                total_value += self.values[card.rank]
+            elif card.type == "frozen":
+                total_value += self.values[card.rank] + 1
+
+        multiplier = self.hand_values[best_hand_name]
         return total_value * multiplier
 
     # ---------------------------------------------------------

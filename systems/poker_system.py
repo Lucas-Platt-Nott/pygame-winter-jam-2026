@@ -10,6 +10,7 @@ from pygame.locals import *
 from config import *
 from systems import PokerPlayer, Player, Deck, CommunityCards, HandCalculator
 
+
 # Poker Round/Phase States
 class RoundState(Enum):
     PRE_FLOP = auto()
@@ -18,6 +19,7 @@ class RoundState(Enum):
     TURN = auto()
     SHOWDOWN = auto()
     NEXT_ROUND = auto()
+
 
 class PhaseState(Enum):
     DRAW = auto()
@@ -30,6 +32,7 @@ class PhaseState(Enum):
     EVALUATION = auto()
     SHOWDOWN = auto()
 
+
 # Poker System Class
 class PokerSystem:
     def __init__(self, player: Player, opponent: PokerPlayer):
@@ -39,7 +42,7 @@ class PokerSystem:
         self.player = player
         self.opponent = opponent
         self.to_discard = 0
-        self.pot_chips = 3000
+        self.pot_chips = 2500
         self.calculator = HandCalculator()
 
         self.state = {
@@ -47,18 +50,33 @@ class PokerSystem:
             "phase": PhaseState.DRAW
         }
 
+        # Showdown bookkeeping (to only apply pot change once per showdown)
+        self.showdown_applied = False
+
     def handle_event(self, event: pygame.Event) -> None:
-        if event.type == MOUSEBUTTONDOWN and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE, PhaseState.HAND_SELECTION]:
+        if event.type == MOUSEBUTTONDOWN and self.state["phase"] in [
+            PhaseState.DISCARD,
+            PhaseState.FREEZE,
+            PhaseState.HAND_SELECTION
+        ]:
             selected = self.player.hand.get_selected_cards()
             self.player.hand.handle_click(event)
 
-            if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
-                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
+            if (
+                self.state["phase"] == PhaseState.FREEZE
+                and len(selected) == 1
+                and len(self.player.hand.get_selected_cards()) != 0
+            ):
+                self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
             elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard:
                 self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
-            elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
+            elif (
+                self.state["phase"] == PhaseState.HAND_SELECTION
+                and len(selected) == 5
+                and len(self.player.hand.get_selected_cards()) != 4
+            ):
                 self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
         elif event.type == KEYDOWN:
@@ -69,10 +87,10 @@ class PokerSystem:
                 if self.state["phase"] == PhaseState.DISCARD:
                     selected_num = len(self.player.hand.get_selected_cards())
 
-                    if selected_num <= self.to_discard:   
+                    if selected_num <= self.to_discard:
                         self.to_discard -= selected_num
                         self.player.hand.discard_selected()
-                        
+
                     if self.to_discard == 0:
                         self.state["phase"] = PhaseState.NEXT_PHASE
 
@@ -82,7 +100,8 @@ class PokerSystem:
                     self.to_discard = 2
 
                 elif self.state["phase"] == PhaseState.HAND_SELECTION:
-                    print(self.calculator.calculate_score(self.player.hand, self.community_cards))
+                    self.calculator.calculate_score(self.player.hand, self.community_cards)
+                    self.state["phase"] = PhaseState.EVALUATION
 
                 elif self.state["phase"] == PhaseState.DRAW and self.state["round"] != RoundState.PRE_FLOP:
                     self.state["phase"] = PhaseState.DRAWING
@@ -94,15 +113,19 @@ class PokerSystem:
                     elif self.state["round"] == RoundState.TURN:
                         self.state["phase"] = PhaseState.NEXT_PHASE
 
-            elif key in nums and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE, PhaseState.HAND_SELECTION]:
+            elif key in nums and self.state["phase"] in [
+                PhaseState.DISCARD,
+                PhaseState.FREEZE,
+                PhaseState.HAND_SELECTION
+            ]:
                 index = nums.index(key)
                 selected = self.player.hand.get_selected_cards()
-                
+
                 if index < len(self.player.hand.cards):
                     if self.player.hand.cards[index].selected:
                         pass
 
-                    elif self.state["phase"] == PhaseState.FREEZE: 
+                    elif self.state["phase"] == PhaseState.FREEZE:
                         if self.player.hand.cards[index].type == "frozen":
                             return
 
@@ -112,11 +135,15 @@ class PokerSystem:
                     elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard:
                         self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
-                    elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
+                    elif (
+                        self.state["phase"] == PhaseState.HAND_SELECTION
+                        and len(selected) == 5
+                        and len(self.player.hand.get_selected_cards()) != 4
+                    ):
                         self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
                     self.player.hand.select(index)
-            
+
             elif key == K_UP:
                 if self.state["phase"] == PhaseState.BET:
                     pass
@@ -150,7 +177,9 @@ class PokerSystem:
 
             for i in range(3):
                 card = self.deck.draw_card()
-                card.type = random.choice(["frozen", "default", "default", "default", "default", "default"])
+                card.type = random.choice(
+                    ["frozen", "default", "default", "default", "default", "default"]
+                )
                 self.community_cards.add(card)
 
     # FLOP / RIVER / TURN
@@ -167,7 +196,7 @@ class PokerSystem:
                 self.opponent.hand.freeze_selected()
 
             self.state["phase"] = PhaseState.FREEZE
-            
+
         elif phase_state == PhaseState.NEXT_PHASE:
             while self.opponent.hand.num_cards > 2:
                 self.opponent.hand.select_random()
@@ -186,7 +215,9 @@ class PokerSystem:
                 self.state["phase"] = PhaseState.HAND_SELECTION
 
             card = self.deck.draw_card()
-            card.type = random.choice(["frozen", "default", "default", "default", "default", "default"])
+            card.type = random.choice(
+                ["frozen", "default", "default", "default", "default", "default"]
+            )
             self.community_cards.add(card)
 
     # SHOWDOWN
@@ -194,14 +225,37 @@ class PokerSystem:
         phase_state = self.state["phase"]
 
         if phase_state == PhaseState.HAND_SELECTION:
+            # Player chooses their best 5; score is calculated when they confirm (ENTER)
             self.calculator.calculate_score(self.player.hand, self.community_cards)
-        
+            # Ensure pot logic will re-run when we actually enter SHOWDOWN
+            self.showdown_applied = False
+
         elif phase_state == PhaseState.EVALUATION:
-            pass
+            # Let the opponent auto-select their optimal hand
+            for card in self.calculator.get_optimal_selections(
+                self.opponent.hand, self.community_cards
+            ):
+                self.opponent.hand.select(self.opponent.hand.cards.index(card))
+
+            self.calculator.calculate_score(self.opponent.hand, self.community_cards)
+            self.state["phase"] = PhaseState.SHOWDOWN
+            # Reset flag so SHOWDOWN can apply pot change once
+            self.showdown_applied = False
 
         elif phase_state == PhaseState.SHOWDOWN:
-            pass
-        
+            # Reveal opponent’s selected cards
+            self.opponent.hand.hide_selected = False
+
+            # Apply pot logic exactly once per showdown
+            if not self.showdown_applied:
+                print(self.opponent.hand.value, self.player.hand.value)
+
+                # Decrease pot by how much more value the player's hand has
+                diff = self.player.hand.value - self.opponent.hand.value
+                self.pot_chips = max(0, self.pot_chips - diff)
+
+                self.showdown_applied = True
+
     def update(self, delta_time: float) -> None:
         round_state = self.state["round"]
 

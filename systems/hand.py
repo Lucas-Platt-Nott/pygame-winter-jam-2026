@@ -38,8 +38,14 @@ class Hand:
         self.hitboxes = []
         self.position = position
 
+        self.hand_type = ""
+        self.value = 0
         self.flip = flip
         self.is_hidden = hidden
+
+        # NEW ATTRIBUTE
+        self.hide_selected = not hidden
+
         self.baseline_y = 60
 
         self.arc_radius = 350
@@ -178,10 +184,10 @@ class Hand:
             base_x, base_y = anim["discard_start_pos"]
             angle = lerp_angle(anim["discard_start_angle"], anim["discard_end_angle"], t)
 
+            # Hidden logic for discarding
             if self.is_hidden:
                 surf = Images.get_image("card_back")
             else:
-                # update highlight for discarding too if you want
                 card.update(delta_time)
                 surf = card.render().copy()
 
@@ -232,11 +238,18 @@ class Hand:
             card.y = base_y + offset
             card.angle = angle
 
-            # 🔹 KEY PART: update highlight animation right before rendering
             card.update(delta_time)
 
-            surf = Images.get_image("card_back") if self.is_hidden else card.render()
-            depth = (total - 1) - index  # 0 = topmost
+            # NEW CONDITIONAL REVEAL LOGIC
+            if self.is_hidden:
+                if card.selected and not self.hide_selected:
+                    surf = card.render()  # reveal selected card
+                else:
+                    surf = Images.get_image("card_back")
+            else:
+                surf = card.render()
+
+            depth = (total - 1) - index
             if depth > 0:
                 tint_value = 255
                 tint = pygame.Surface(surf.get_size(), SRCALPHA)
@@ -260,7 +273,6 @@ class Hand:
 
         self.unfreeze_selected()
 
-        # Reflow remaining cards
         for i, c in enumerate(self._cards):
             anim = self.anim_data[c]
             target_pos, target_angle = self._compute_target(i, len(self._cards))
@@ -312,7 +324,6 @@ class Hand:
         self.discarding.append(card)
 
     def update(self, delta_time: float) -> None:
-        # no per-card update here anymore; it's done in render_surface
         self.render_surface(delta_time)
 
     def draw(self, surface: pygame.Surface) -> None:

@@ -52,35 +52,41 @@ alagard_small = pygame.Font("assets/fonts/alagard.ttf", 16)
 # Load text
 Images.register_image(render_outlined(alagard_large, "FROZEN\n FUNDS", (255, 255, 255), (41, 51, 61), 4), "title")
 Images.register_image(render_outlined(alagard_small, "(Made for Pygame Winter Jam 2026 by ImNottL & Commando)", (125, 125, 125), (41, 51, 61), 1), "credits")
-Images.register_image(render_outlined(alagard, "[Press Enter to Play]", (175, 175, 175), (41, 51, 61), 1), "title_prompt")
+Images.register_image(render_outlined(alagard, "[Press Enter to Start]", (175, 175, 175), (41, 51, 61), 1), "title_prompt")
 
 # Draw prompts
-Images.register_image(render_outlined(alagard_small, "Cards are dealt at the start of each phase:", (125, 125, 125), (1, 1, 1), 1), "DRAWING_top")
-Images.register_image(render_outlined(alagard_small, "Dealing cards..", (125, 125, 125), (1, 1, 1), 1), "DRAWING_bot")
+Images.register_image(render_outlined(alagard_small, "Cards are dealt at the start of each phase:", (125, 125, 125), (41, 51, 61), 1), "DRAWING_top")
+Images.register_image(render_outlined(alagard_small, "Dealing cards..", (125, 125, 125), (41, 51, 61), 1), "DRAWING_bot")
 
-Images.register_image(render_outlined(alagard_small, "Community Cards are dealt at the end of each phase:", (125, 125, 125), (1, 1, 1), 1), "DRAW_top")
-Images.register_image(render_outlined(alagard_small, "[Press Enter to Advance to Next Phase]", (125, 125, 125), (1, 1, 1), 1), "DRAW_bot")
+Images.register_image(render_outlined(alagard_small, "Community Cards are dealt at the end of each phase:", (125, 125, 125), (41, 51, 61), 1), "DRAW_top")
+Images.register_image(render_outlined(alagard_small, "[Press Enter to Advance to Next Phase]", (125, 125, 125), (41, 51, 61), 1), "DRAW_bot")
 
 # Bet prompts
-Images.register_image(render_outlined(alagard_small, "Would you like to raise the pot? If so by how much?", (125, 125, 125), (1, 1, 1), 1), "BET_top")
-Images.register_image(render_outlined(alagard_small, "[Press Enter to Place Bet]", (125, 125, 125), (1, 1, 1), 1), "BET_bot")
+Images.register_image(render_outlined(alagard_small, "Would you like to raise the pot? If so by how much?", (125, 125, 125), (41, 51, 61), 1), "BET_top")
+Images.register_image(render_outlined(alagard_small, "[Press Enter to Place Bet]", (125, 125, 125), (41, 51, 61), 1), "BET_bot")
 
 # Freeze prompts
-Images.register_image(render_outlined(alagard_small, "                    Select up to one Regular Card to Freeze \n  The Card gains 1x discard protection and +1 value when scored.", (125, 125, 125), (1, 1, 1), 1), "FREEZE_top")
-Images.register_image(render_outlined(alagard_small, "[Press Enter to Freeze Selected]", (125, 125, 125), (1, 1, 1), 1), "FREEZE_bot")
+Images.register_image(render_outlined(alagard_small, "                    Select up to one Regular Card to Freeze \n  The Card gains 1x discard protection and +1 value when scored.", (125, 125, 125), (41, 51, 61), 1), "FREEZE_top")
+Images.register_image(render_outlined(alagard_small, "[Press Enter to Freeze Selected]", (125, 125, 125), (41, 51, 61), 1), "FREEZE_bot")
 
 # Discard prompts
-Images.register_image(render_outlined(alagard_small, "Discard until you have no more than 2 Regular Cards.\n     (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (1, 1, 1), 1), "DISCARD_top_preflop")
-Images.register_image(render_outlined(alagard_small, "       Discard 2 Cards, Discarded Frozen Cards will Thaw instead.\n         (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (1, 1, 1), 1), "DISCARD_top")
-Images.register_image(render_outlined(alagard_small, "[Press Enter to Discard Selected]", (125, 125, 125), (1, 1, 1), 1), "DISCARD_bot")
+Images.register_image(render_outlined(alagard_small, "Discard until you have no more than 2 Regular Cards.\n     (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top_preflop")
+Images.register_image(render_outlined(alagard_small, "       Discard 2 Cards, Discarded Frozen Cards will Thaw instead.\n         (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top")
+Images.register_image(render_outlined(alagard_small, "[Press Enter to Discard Selected]", (125, 125, 125), (41, 51, 61), 1), "DISCARD_bot")
 
 # Hand Selection prompts
-Images.register_image(render_outlined(alagard_small, "Select up to 5 cards to build the best poker hand you can to beat your opponent.\n(Community Cards are automatically applied, ALL Played Cards will be discarded)", (125, 125, 125), (1, 1, 1), 1), "HAND_SELECTION_top")
-Images.register_image(render_outlined(alagard_small, "[Press Enter to Submit Selected Hand]", (125, 125, 125), (1, 1, 1), 1), "HAND_SELECTION_bot")
+Images.register_image(render_outlined(alagard_small, "Select up to 5 cards, The difference in Hand value will respectively Freeze/Thaw your funds that amount.\n          (Community Cards are automatically applied, ALL Played Cards will be discarded)", (125, 125, 125), (41, 51, 61), 1), "HAND_SELECTION_top")
+Images.register_image(render_outlined(alagard_small, "[Press Enter to Submit Selected Hand]", (125, 125, 125), (41, 51, 61), 1), "HAND_SELECTION_bot")
 
 # Keybind prompt(s)
-Images.register_image(render_outlined(alagard_small, "(1-9: Select card at Position & Enter: Confirm selection)", (125, 125, 125), (1, 1, 1), 1), "input_prompt")
-Images.register_image(render_outlined(alagard_small, "Lorem Ispum", (125, 125, 125), (1, 1, 1), 1), "intro_text")
+Images.register_image(render_outlined(alagard_small, "(1-9: Select card at Position & Enter: Confirm selection)", (125, 125, 125), (41, 51, 61), 1), "input_prompt")
+Images.register_image(render_outlined(alagard, "[Press Enter to Play]", (200, 200, 200), (41, 51, 61), 1), "intro_prompt")
+
+# N/A prompt(s)
+Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "EVALUATION_top")
+Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "EVALUATION_bot")
+Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "SHOWDOWN_top")
+Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "SHOWDOWN_bot")
 
 # Load images
 poker_background = pygame.transform.scale(
