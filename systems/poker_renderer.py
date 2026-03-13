@@ -1,7 +1,7 @@
 import pygame
 import math
 from config import *
-from assets import Images
+from assets import Images, render_outlined, alagard_small
 from systems import PokerSystem, PhaseState, RoundState
 
 class PokerRenderer:
@@ -11,6 +11,14 @@ class PokerRenderer:
         self.bot_prompt = pygame.Surface((0, 0))
         self.alpha = 0
         self.time_elapsed = 0
+        self.chip_image = Images.get_image("chip")
+
+        self.player_balance = pygame.Surface((0, 0))
+        self.opponent_balance = pygame.Surface((0, 0))
+
+    def update_balance_text(self, system: PokerSystem) -> None:
+        self.player_balance = render_outlined(alagard_small, f"Chips: {system.player.chips}", (255, 255, 255), (0, 0, 0), 1)
+        self.opponent_balance = render_outlined(alagard_small, f"Chips: {system.opponent.chips}", (255, 255, 255), (0, 0, 0), 1)
 
     def update(self, delta_time: float, system: PokerSystem) -> None:
         phase = system.state["phase"]
@@ -34,13 +42,8 @@ class PokerRenderer:
 
         elif self.current_phase in [PhaseState.DISCARD, PhaseState.FREEZE]:
             self.bot_prompt = Images.get_image(f"{phase_name}_bot")
-
-            num_cards = system.player.hand.num_cards
-            for card in system.player.hand.get_selected_cards():
-                if card.type == "default":
-                    num_cards -= 1
             
-            if num_cards <= 2 and self.current_phase == PhaseState.DISCARD or len(system.player.hand.get_selected_cards()) > 0 and self.current_phase == PhaseState.FREEZE:
+            if len(system.player.hand.get_selected_cards()) == system.to_discard and self.current_phase == PhaseState.DISCARD or len(system.player.hand.get_selected_cards()) > 0 and self.current_phase == PhaseState.FREEZE:
                 self.time_elapsed += delta_time
                 h = (455 / 2) + (55 / 2) * math.cos(20 * self.time_elapsed)
                 self.bot_prompt.fill((h, h, h), special_flags=pygame.BLEND_RGB_MULT)
@@ -62,6 +65,14 @@ class PokerRenderer:
             surface.blit(prompt, prect)
 
         surface.blit(self.bot_prompt, botrect)
+
+        # Player balance
+        surface.blit(self.chip_image, (SCREEN_SIZE[0] * 0.4 - self.chip_image.height // 2, SCREEN_SIZE[1] * 0.25))
+        surface.blit(self.player_balance, (SCREEN_SIZE[0] * 0.4 - self.chip_image.height // 2, SCREEN_SIZE[1] * 0.25))
+
+        # Opponent balance
+        surface.blit(self.chip_image, (SCREEN_SIZE[0] * 0.4 - self.chip_image.width // 2, SCREEN_SIZE[1] * 0.7))
+        surface.blit(self.opponent_balance, (SCREEN_SIZE[0] * 0.4 - self.chip_image.width // 2, SCREEN_SIZE[1] * 0.7))
 
         player_hand.draw(surface)
         other_hand.draw(surface)

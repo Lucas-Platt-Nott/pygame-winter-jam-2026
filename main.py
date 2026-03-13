@@ -24,12 +24,15 @@ class FrozenFunds(Application):
         self.angle = 0
         self.angle_step = 0.1
         self.time_elapsed = 0
+
+        pygame.display.set_icon(Images.get_image("chip"))
     
     def add_scene(self, scene_type: type, scene_key: str) -> None:
         scene = scene_type(self.scene_manager, self.player)
         self.scene_manager.register_scene(scene, scene_key)
 
     def update(self, delta_time):
+        pygame.display.set_caption(f"Frozen Funds - FPS : {int(self.clock.get_fps())}")
         self.time_elapsed += delta_time
 
         if self.time_elapsed >= self.rotate_interval:

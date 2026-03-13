@@ -110,6 +110,7 @@ borderless = pygame.transform.grayscale(borderless)
 borderless.set_alpha(150)
 
 Images.register_image(borderless, "borderless_card")
+Images.register_image(pygame.image.load("assets/images/chip.png").convert_alpha(), "chip")
 
 # Load card images
 for file_path in os.listdir("assets/images/cards"):

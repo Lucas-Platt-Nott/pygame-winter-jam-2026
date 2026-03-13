@@ -78,7 +78,7 @@ class Card:
                 color = (255, 0, 80)
 
             else:
-                color = (10, 10, 10)
+                color = (80, 80, 80)
 
             outline_surf = pygame.Surface(
                 (surf.get_width() + thickness * 2, surf.get_height() + thickness * 2),

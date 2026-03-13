@@ -69,7 +69,7 @@ class Application:
                 self.scene_manager.handle_event(event)
 
     def update(self, delta_time: float) -> None:
-        pygame.display.set_caption(f"{self.clock.get_fps()}")
+        # pygame.display.set_caption(f"{self.clock.get_fps()}")
         self.scene_manager.update(delta_time)
 
     def draw(self) -> None:
