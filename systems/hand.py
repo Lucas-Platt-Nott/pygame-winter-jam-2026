@@ -135,6 +135,9 @@ class Hand:
                 break
 
     def add(self, card: Card) -> None:
+        if card == None:
+            return
+
         index = len(self._cards)
         self._cards.append(card)
 

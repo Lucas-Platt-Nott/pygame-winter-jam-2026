@@ -7,6 +7,7 @@ import pygame
 from pygame.locals import *
 
 # Internal
+from assets import Sounds
 from config import *
 from systems import PokerPlayer, Player, Deck, CommunityCards, HandCalculator
 
@@ -42,8 +43,9 @@ class PokerSystem:
         self.player = player
         self.opponent = opponent
         self.to_discard = 0
-        self.pot_chips = 2500
+        self.pot_chips = 1251
         self.calculator = HandCalculator()
+        self.victory_timer = 0
 
         self.state = {
             "round": RoundState.PRE_FLOP,
@@ -171,8 +173,8 @@ class PokerSystem:
         phase_state = self.state["phase"]
 
         if phase_state == PhaseState.DRAW:
-            self.player.queue_draw(5)
-            self.opponent.queue_draw(5)
+            self.player.queue_draw(4)
+            self.opponent.queue_draw(4)
 
             self.state["phase"] = PhaseState.DRAWING
 
@@ -254,6 +256,7 @@ class PokerSystem:
             self.state["phase"] = PhaseState.SHOWDOWN
             # Reset flag so SHOWDOWN can apply pot change once
             self.showdown_applied = False
+            Sounds.get_sound("counter").play()
 
         elif phase_state == PhaseState.SHOWDOWN:
             # Reveal opponent’s selected cards
@@ -272,10 +275,16 @@ class PokerSystem:
     def update(self, delta_time: float) -> None:
         round_state = self.state["round"]
 
+        if self.pot_chips <= 0:
+            self.victory_timer += delta_time
+
         self.player.update(self.deck, delta_time)
         self.opponent.update(self.deck, delta_time)
         self.community_cards.update(delta_time)
 
+        if self.victory_timer > 0:
+            return
+        
         if round_state == RoundState.PRE_FLOP:
             self.update_preflop(delta_time)
 

@@ -105,6 +105,9 @@ class Poker(Scene):
         self.system.update(delta_time)
         self.renderer.update(delta_time, self.system)
 
+        if self.system.victory_timer >= 3:
+            self.scene_manager.set_scene("victory")
+
     def draw(self, surface: pygame.Surface) -> None:
         if self.loading:
             surface.blit(self.intro_image, (0, 0))

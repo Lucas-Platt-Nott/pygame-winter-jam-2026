@@ -34,6 +34,9 @@ class CommunityCards:
         return (center_x, center_y)
 
     def add(self, card: Card):
+        if card == None:
+            return
+        
         if len(self.cards) >= 5:
             return  # Can't exceed 5 community cards
 

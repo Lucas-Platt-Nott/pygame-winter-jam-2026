@@ -39,8 +39,9 @@ Sounds.load_sound("assets/sounds/title_music.ogg", "title_music")
 Sounds.load_sound("assets/sounds/background_music.ogg", "background_music")
 Sounds.load_sound("assets/sounds/card_discard.ogg", "card_discard")
 Sounds.load_sound("assets/sounds/card_draw.ogg", "card_draw")
-Sounds.load_sound("assets/sounds/card_freeze.ogg", "card_freeze")
 Sounds.load_sound("assets/sounds/card_select.ogg", "card_select")
+Sounds.load_sound("assets/sounds/freeze.ogg", "card_freeze")
+Sounds.load_sound("assets/sounds/counter.ogg", "counter")
 
 # Load fonts
 pygame.font.init()
@@ -70,7 +71,7 @@ Images.register_image(render_outlined(alagard_small, "                    Select
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Freeze Selected]", (125, 125, 125), (41, 51, 61), 1), "FREEZE_bot")
 
 # Discard prompts
-Images.register_image(render_outlined(alagard_small, "Discard until you have no more than 2 Regular Cards.\n     (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top_preflop")
+Images.register_image(render_outlined(alagard_small, "       Discard 3 Cards, Discarded Frozen Cards will Thaw instead.\n         (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top_preflop")
 Images.register_image(render_outlined(alagard_small, "       Discard 2 Cards, Discarded Frozen Cards will Thaw instead.\n         (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top")
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Discard Selected]", (125, 125, 125), (41, 51, 61), 1), "DISCARD_bot")
 
