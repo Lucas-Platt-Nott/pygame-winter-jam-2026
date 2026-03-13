@@ -59,6 +59,7 @@ if __name__ == "__main__":
     # Initialise game
     application = FrozenFunds(SCREEN_SIZE, fps=0)
 
+    application.add_scene(Victory, "victory")
     application.add_scene(Poker, "poker")
     application.add_scene(Title, "title")
     application.set_scene("title")
