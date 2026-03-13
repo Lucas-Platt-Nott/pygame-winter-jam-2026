@@ -16,10 +16,16 @@ class PokerRenderer:
         # Chip image
         self.chip_image = pygame.transform.scale_by(Images.get_image("chip"), 3/2)
 
+        # Deck image
+        self.deck_image = pygame.transform.scale_by(Images.get_image("card_back"), 1.2)
+
         # Pot display
         self.pot_balance = pygame.Surface((0, 0))
         self.display_pot_chips = 0  # animated pot value
         self.pot_shake_offset = 0.0
+
+        # Deck count display
+        self.deck_count_surface = pygame.Surface((0, 0))
 
         # Hand value/type text
         self.hand_value_text = None
@@ -37,7 +43,7 @@ class PokerRenderer:
         # Soft pulse when highlighted
         if highlight:
             t = self.time_elapsed
-            pulse = 0.5 + 0.5 * math.sin(3 * t)  # slower, smoother
+            pulse = 0.5 + 0.5 * math.sin(3 * t)
             r = 255
             g = int(220 + 35 * pulse)
             b = int(180 + 40 * pulse)
@@ -49,6 +55,21 @@ class PokerRenderer:
             alagard_medium,
             f"Frozen Funds Remaining: {int(self.display_pot_chips)}",
             color,
+            (0, 0, 0),
+            1
+        )
+
+    # ---------------------------------------------------------
+    # DECK COUNT UPDATE
+    # ---------------------------------------------------------
+    def update_deck_display(self, system: PokerSystem) -> None:
+        current = len(system.deck.cards)
+        maximum = len(system.deck.standard_cards)
+
+        self.deck_count_surface = render_outlined(
+            alagard_small,
+            f"{current}/{maximum}",
+            (255, 255, 255),
             (0, 0, 0),
             1
         )
@@ -126,13 +147,15 @@ class PokerRenderer:
         )
 
         if is_showdown:
-            # Much gentler shake
             self.pot_shake_offset = 1.5 * math.sin(10 * self.time_elapsed)
         else:
             self.pot_shake_offset = 0.0
 
-        # Always update pot text (highlight only during showdown)
+        # Update pot text
         self.update_balance_text(system, highlight=is_showdown)
+
+        # Update deck text
+        self.update_deck_display(system)
 
     # ---------------------------------------------------------
     # DRAW
@@ -192,6 +215,21 @@ class PokerRenderer:
                 base_y
             )
         )
+
+        # ---------------------------------------------------------
+        # DECK DISPLAY (icon + count)
+        # ---------------------------------------------------------
+        deck_x = SCREEN_SIZE[0] * 0.025
+        deck_y = SCREEN_SIZE[1] - self.deck_image.height - self.deck_count_surface.height - 25
+
+        # Draw deck icon
+        surface.blit(self.deck_image, (deck_x, deck_y))
+
+        # Draw deck count text
+        count_rect = self.deck_count_surface.get_rect()
+        count_rect.center = (deck_x + self.deck_image.get_width() // 2,
+                             deck_y + self.deck_image.get_height() + 18)
+        surface.blit(self.deck_count_surface, count_rect)
 
         # ---------------------------------------------------------
         # HAND VALUE + TYPE (during HAND_SELECTION)

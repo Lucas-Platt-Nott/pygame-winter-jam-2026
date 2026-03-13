@@ -189,7 +189,7 @@ class Title(Scene):
             return
 
         if event.type == MOUSEMOTION:
-            mouse_pos = pygame.Vector2(event.pos)
+            mouse_pos = pygame.Vector2(event.dict["pos"])
             for card in self.cards:
                 card.handle_motion(mouse_pos)
 
