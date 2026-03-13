@@ -70,11 +70,12 @@ Images.register_image(render_outlined(alagard_small, "Would you like to raise th
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Place Bet]", (125, 125, 125), (1, 1, 1), 1), "BET_bot")
 
 # Freeze prompts
-Images.register_image(render_outlined(alagard_small, "                    Select up to one Regular Card to Freeze \n                      (Thawed after an attempted Discard)\n  The Card gains 1x discard protection but -1 value when scored.", (125, 125, 125), (1, 1, 1), 1), "FREEZE_top")
+Images.register_image(render_outlined(alagard_small, "                    Select up to one Regular Card to Freeze \n                      (Thawed after an attempted Discard)\n  The Card gains 1x discard protection and +1 value when scored.", (125, 125, 125), (1, 1, 1), 1), "FREEZE_top")
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Freeze Selected]", (125, 125, 125), (1, 1, 1), 1), "FREEZE_bot")
 
 # Discard prompts
-Images.register_image(render_outlined(alagard_small, "Discard until you have no more than 2 Regular Cards.\n     (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (1, 1, 1), 1), "DISCARD_top")
+Images.register_image(render_outlined(alagard_small, "Discard until you have no more than 2 Regular Cards.\n     (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (1, 1, 1), 1), "DISCARD_top_preflop")
+Images.register_image(render_outlined(alagard_small, "       Discard 2 Cards, Discarded Frozen Cards will Thaw instead.\n     (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (1, 1, 1), 1), "DISCARD_top")
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Discard Selected]", (125, 125, 125), (1, 1, 1), 1), "DISCARD_bot")
 
 # Hand Selection prompts

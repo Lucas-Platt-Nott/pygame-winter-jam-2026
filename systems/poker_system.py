@@ -38,6 +38,7 @@ class PokerSystem:
         self.community_cards = CommunityCards()
         self.player = player
         self.opponent = opponent
+        self.to_discard = 0
 
         self.state = {
             "round": RoundState.PRE_FLOP,
@@ -45,12 +46,15 @@ class PokerSystem:
         }
 
     def handle_event(self, event: pygame.Event) -> None:
-        if event.type == MOUSEBUTTONDOWN and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE]:
+        if event.type == MOUSEBUTTONDOWN and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE, PhaseState.HAND_SELECTION]:
             selected = self.player.hand.get_selected_cards()
             self.player.hand.handle_click(event)
 
             if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
                 self.player.hand.select(self.player.hand.cards.index(selected[0]))
+
+            elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
+                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
         elif event.type == KEYDOWN:
             nums = [K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9]
@@ -58,14 +62,22 @@ class PokerSystem:
 
             if key == K_RETURN:
                 if self.state["phase"] == PhaseState.DISCARD:
-                    self.player.hand.discard_selected()
+                    selected_num = len(self.player.hand.get_selected_cards())
 
-                    if self.player.hand.num_cards <= 2:
+                    if selected_num <= self.to_discard:   
+                        self.to_discard -= selected_num
+                        self.player.hand.discard_selected()
+                    
+                    if self.to_discard == 0:
                         self.state["phase"] = PhaseState.NEXT_PHASE
 
                 elif self.state["phase"] == PhaseState.FREEZE:
                     self.player.hand.freeze_selected()
                     self.state["phase"] = PhaseState.DISCARD
+                    self.to_discard = 2
+
+                elif self.state["phase"] == PhaseState.HAND_SELECTION:
+                    self.player.hand.submit()
 
                 elif self.state["phase"] == PhaseState.DRAW and self.state["round"] != RoundState.PRE_FLOP:
                     self.state["phase"] = PhaseState.DRAWING
@@ -89,6 +101,7 @@ class PokerSystem:
 
                 elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
                     self.player.hand.select(self.player.hand.cards.index(selected[0]))
+
     # PRE-FLOP
     def update_preflop(self, delta_time: float) -> None:
         phase_state = self.state["phase"]
@@ -101,6 +114,7 @@ class PokerSystem:
 
         elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
             self.state["phase"] = PhaseState.DISCARD
+            self.to_discard = 3
 
         elif phase_state == PhaseState.NEXT_PHASE:
             self.opponent.hand.select_random()
@@ -133,7 +147,7 @@ class PokerSystem:
             while self.opponent.hand.num_cards > 2:
                 self.opponent.hand.select_random()
                 self.opponent.hand.discard_selected()
-                
+
             self.state["phase"] = PhaseState.DRAW
 
             if round_state == RoundState.FLOP:

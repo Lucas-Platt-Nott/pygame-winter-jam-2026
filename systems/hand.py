@@ -52,6 +52,7 @@ class Hand:
 
         # Cards currently animating out
         self.discarding = []
+        self.submitted = []
 
     @property
     def cards(self) -> list[Card]:
@@ -82,6 +83,16 @@ class Hand:
             self.baseline_y + 2 * abs(angle)
         )
         return pos, angle
+
+    def calculate_selected_score(self, community_cards):
+        pass
+
+    def calculate_submitted_score(self, community_cards):
+        pass
+
+    def submit(self):
+        self.submitted = self.get_selected_cards()
+        self.discard_selected()
 
     def get_selected_cards(self):
         return [card for card in self._cards if card.selected]
@@ -254,7 +265,12 @@ class Hand:
 
     def discard_selected(self) -> None:
         for card in self.get_selected_cards():
+            if card.type == "frozen":
+                continue
+
             self.remove(card)
+
+        self.unfreeze_selected()
 
         # Reflow remaining cards
         for i, c in enumerate(self._cards):
@@ -273,6 +289,16 @@ class Hand:
             
             if card.type == "default":
                 card.type = "frozen"
+                card.update_image()
+
+        Sounds.get_sound("card_freeze").play()
+
+    def unfreeze_selected(self) -> None:
+        for card in self.get_selected_cards():
+            self.select(self.cards.index(card))
+            
+            if card.type == "frozen":
+                card.type = "default"
                 card.update_image()
 
         Sounds.get_sound("card_freeze").play()

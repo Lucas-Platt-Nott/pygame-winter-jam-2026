@@ -24,6 +24,10 @@ class PokerRenderer:
         elif self.alpha < 255:
             self.alpha = min(self.alpha + 255 * delta_time, 255)
             self.top_prompt = Images.get_image(f"{phase_name}_top")
+
+            if phase == PhaseState.DISCARD and system.state["round"] == RoundState.PRE_FLOP:
+                self.top_prompt = Images.get_image(f"{phase_name}_top_preflop")
+            
             self.top_prompt.set_alpha(self.alpha)
             self.bot_prompt = Images.get_image(f"{phase_name}_bot")
             self.bot_prompt.set_alpha(self.alpha)
