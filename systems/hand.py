@@ -11,7 +11,6 @@ from config import *
 from systems import Card
 from assets import Images, Sounds
 
-
 def cubic_bezier(t, p0, p1, p2, p3):
     u = 1 - t
     return (
@@ -30,7 +29,6 @@ def lerp(a, b, t):
 def lerp_angle(a, b, t):
     diff = (b - a + 180) % 360 - 180
     return a + diff * t
-
 
 class Hand:
     def __init__(self, position=(0, 0), hidden=False, flip=False) -> None:
@@ -182,10 +180,11 @@ class Hand:
 
             if self.is_hidden:
                 surf = Images.get_image("card_back")
-
             else:
+                # update highlight for discarding too if you want
+                card.update(delta_time)
                 surf = card.render().copy()
-                
+
             surf = pygame.transform.rotate(surf, angle)
 
             fade_t = min(1.0, t * 2.2)
@@ -233,20 +232,17 @@ class Hand:
             card.y = base_y + offset
             card.angle = angle
 
-            # Draw card normally
+            # 🔹 KEY PART: update highlight animation right before rendering
+            card.update(delta_time)
+
             surf = Images.get_image("card_back") if self.is_hidden else card.render()
             depth = (total - 1) - index  # 0 = topmost
             if depth > 0:
-                # Lerp tint between 255 (no tint) and ~215 (slightly darker)
                 tint_value = 255
-
                 tint = pygame.Surface(surf.get_size(), SRCALPHA)
                 surf.fill((tint_value, tint_value, tint_value), special_flags=BLEND_RGB_MULT)
 
             self.surface.blit(surf, (card.x, card.y))
-
-            # --- FIXED TINT USING BLEND_RGB_MULT ---
-           
 
             rect = pygame.Rect(card.x, card.y, surf.get_width(), surf.get_height())
             self.hitboxes.append(rect)
@@ -278,7 +274,7 @@ class Hand:
     def freeze_selected(self) -> None:
         for card in self.get_selected_cards():
             self.select(self.cards.index(card))
-            
+
             if card.type == "default":
                 card.type = "frozen"
                 card.update_image()
@@ -288,7 +284,7 @@ class Hand:
     def unfreeze_selected(self) -> None:
         for card in self.get_selected_cards():
             self.select(self.cards.index(card))
-            
+
             if card.type == "frozen":
                 card.type = "default"
                 card.update_image()
@@ -316,10 +312,8 @@ class Hand:
         self.discarding.append(card)
 
     def update(self, delta_time: float) -> None:
+        # no per-card update here anymore; it's done in render_surface
         self.render_surface(delta_time)
-
-        for card in self.cards:
-            card.highlighted = False
 
     def draw(self, surface: pygame.Surface) -> None:
         if self.flip:

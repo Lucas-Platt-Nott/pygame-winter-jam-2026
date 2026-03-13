@@ -20,7 +20,7 @@ class HandCalculator:
         # -----------------------------------------------------
         contributing_set = set(best_hand_cards)
 
-        for card in cards:
+        for card in hand.cards + community_cards.cards:
             card.highlighted = card in contributing_set
 
         # -----------------------------------------------------

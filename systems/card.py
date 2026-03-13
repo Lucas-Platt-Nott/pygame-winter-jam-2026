@@ -1,4 +1,3 @@
-# External
 import pygame
 
 # Internal
@@ -23,6 +22,11 @@ class Card:
         self.highlighted = False
         self.anim = None
 
+        # Highlight animation state
+        self.highlight_thickness = 0.0
+        self.max_highlight_thickness = 6
+        self.highlight_speed = 12.0
+
     @property
     def name(self) -> str:
         return f"{self.type}_{self.suit}_{self.rank}"
@@ -44,42 +48,50 @@ class Card:
             )
         return self._rotation_cache[angle]
 
+    def update(self, dt: float):
+        target = self.max_highlight_thickness if self.highlighted else 0.0
+        self.highlight_thickness += (target - self.highlight_thickness) * self.highlight_speed * dt
+        if abs(self.highlight_thickness) < 0.01:
+            self.highlight_thickness = 0.0
+
     def render(self) -> pygame.Surface:
         surf = self.get_rotated(self.angle)
 
-        # Apply scaling
         if self.scale != 1.0:
             w = int(surf.get_width() * self.scale)
             h = int(surf.get_height() * self.scale)
             surf = pygame.transform.smoothscale(surf, (w, h))
 
-        # Apply alpha
         if self.alpha != 255:
             surf = surf.copy()
             surf.set_alpha(self.alpha)
 
-        # --- MASK-BASED OUTLINE ---
-        if self.highlighted:
-            # Create mask from the card surface
+        thickness = int(self.highlight_thickness)
+
+        if thickness > 0:
             mask = pygame.mask.from_surface(surf)
 
-            # Outline thickness
-            thickness = 4
-            color = (80, 180, 255)  # bright light blue
+            if self.type == "frozen":
+                color = (80, 180, 255)
 
-            # Create a new surface for the outline
+            elif self.suit in ["hearts", "diamonds"]:
+                color = (255, 0, 80)
+
+            else:
+                color = (10, 10, 10)
+
             outline_surf = pygame.Surface(
                 (surf.get_width() + thickness * 2, surf.get_height() + thickness * 2),
                 pygame.SRCALPHA
             )
 
-            # Draw outline by offsetting the mask in multiple directions
+            mask_surf = mask.to_surface(setcolor=color, unsetcolor=(0, 0, 0, 0))
+
             for dx in range(-thickness, thickness + 1):
                 for dy in range(-thickness, thickness + 1):
                     if dx * dx + dy * dy <= thickness * thickness:
-                        outline_surf.blit(mask.to_surface(setcolor=color, unsetcolor=(0, 0, 0, 0)), (dx + thickness, dy + thickness))
+                        outline_surf.blit(mask_surf, (dx + thickness, dy + thickness))
 
-            # Blit the card on top of the outline
             outline_surf.blit(surf, (thickness, thickness))
             surf = outline_surf
 

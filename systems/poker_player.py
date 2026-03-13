@@ -29,7 +29,6 @@ class PokerPlayer:
             self.hand.add(card)
 
     def update(self, deck: Deck, delta_time: float) -> None:
-
         if self.cards_to_draw > 0 and self.time_elapsed > self.draw_interval:
             self.time_elapsed = 0
             self.cards_to_draw -= 1

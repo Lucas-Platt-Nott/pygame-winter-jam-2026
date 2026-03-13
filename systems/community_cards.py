@@ -109,6 +109,9 @@ class CommunityCards:
                 card.y = target_y
 
     def update(self, delta_time: float):
+        for card in self.cards:
+            card.update(delta_time)
+            
         self.render_surface(delta_time)
 
     def draw(self, screen: pygame.Surface):

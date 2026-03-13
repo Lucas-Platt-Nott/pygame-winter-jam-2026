@@ -54,11 +54,11 @@ class PokerSystem:
             if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
                 self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
-            elif self.state["phase"] == PhaseState.DISCARD and len(selected) == self.to_discard:
-                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
+            elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard:
+                self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
             elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
-                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
+                self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
         elif event.type == KEYDOWN:
             nums = [K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9]
