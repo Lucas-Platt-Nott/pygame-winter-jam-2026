@@ -39,6 +39,7 @@ class PokerSystem:
         self.player = player
         self.opponent = opponent
         self.to_discard = 0
+        self.pot_chips = 3000
         self.calculator = HandCalculator()
 
         self.state = {
@@ -52,7 +53,7 @@ class PokerSystem:
             self.player.hand.handle_click(event)
 
             if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
-                self.player.hand.select(self.player.hand.cards.index(selected[0]))
+                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
             elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard:
                 self.player.hand.select(self.player.hand.cards.index(selected[0]))
@@ -96,13 +97,17 @@ class PokerSystem:
             elif key in nums and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE, PhaseState.HAND_SELECTION]:
                 index = nums.index(key)
                 selected = self.player.hand.get_selected_cards()
-
+                
                 if index < len(self.player.hand.cards):
                     if self.player.hand.cards[index].selected:
                         pass
 
-                    elif self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
-                        self.player.hand.select(self.player.hand.cards.index(selected[0]))
+                    elif self.state["phase"] == PhaseState.FREEZE: 
+                        if self.player.hand.cards[index].type == "frozen":
+                            return
+
+                        elif len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
+                            self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
                     elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard:
                         self.player.hand.select(self.player.hand.cards.index(selected[0]))
@@ -111,6 +116,14 @@ class PokerSystem:
                         self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
                     self.player.hand.select(index)
+            
+            elif key == K_UP:
+                if self.state["phase"] == PhaseState.BET:
+                    pass
+
+            elif key == K_DOWN:
+                if self.state["phase"] == PhaseState.BET:
+                    pass
 
     # PRE-FLOP
     def update_preflop(self, delta_time: float) -> None:
@@ -136,7 +149,9 @@ class PokerSystem:
             self.state["round"] = RoundState.FLOP
 
             for i in range(3):
-                self.community_cards.add(self.deck.draw_card())
+                card = self.deck.draw_card()
+                card.type = random.choice(["frozen", "default", "default", "default", "default", "default"])
+                self.community_cards.add(card)
 
     # FLOP / RIVER / TURN
     def update_round(self, delta_time: float) -> None:
@@ -170,7 +185,9 @@ class PokerSystem:
                 self.state["round"] = RoundState.SHOWDOWN
                 self.state["phase"] = PhaseState.HAND_SELECTION
 
-            self.community_cards.add(self.deck.draw_card())
+            card = self.deck.draw_card()
+            card.type = random.choice(["frozen", "default", "default", "default", "default", "default"])
+            self.community_cards.add(card)
 
     # SHOWDOWN
     def update_showdown(self, delta_time: float) -> None:

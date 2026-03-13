@@ -46,6 +46,7 @@ Sounds.load_sound("assets/sounds/card_select.wav", "card_select")
 pygame.font.init()
 alagard_large = pygame.Font("assets/fonts/alagard.ttf", 128)
 alagard = pygame.Font("assets/fonts/alagard.ttf", 64)
+alagard_medium = pygame.Font("assets/fonts/alagard.ttf", 24)
 alagard_small = pygame.Font("assets/fonts/alagard.ttf", 16)
 
 # Load text
@@ -78,7 +79,8 @@ Images.register_image(render_outlined(alagard_small, "Select up to 5 cards to bu
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Submit Selected Hand]", (125, 125, 125), (1, 1, 1), 1), "HAND_SELECTION_bot")
 
 # Keybind prompt(s)
-Images.register_image(render_outlined(alagard_small, "1-9: Select card at Position\nENTER: Confirm selection", (200, 200, 200), (1, 1, 1), 1), "input_prompt")
+Images.register_image(render_outlined(alagard_small, "(1-9: Select card at Position & Enter: Confirm selection)", (125, 125, 125), (1, 1, 1), 1), "input_prompt")
+Images.register_image(render_outlined(alagard_small, "Lorem Ispum", (125, 125, 125), (1, 1, 1), 1), "intro_text")
 
 # Load images
 poker_background = pygame.transform.scale(
