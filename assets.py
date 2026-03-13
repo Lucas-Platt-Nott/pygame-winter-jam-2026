@@ -35,12 +35,12 @@ Images = ImageManager()
 Sounds = SoundManager()
 
 # Load sounds
-Sounds.load_sound("assets/sounds/title_music.wav", "title_music")
-Sounds.load_sound("assets/sounds/background_music.wav", "background_music")
-Sounds.load_sound("assets/sounds/card_discard.wav", "card_discard")
-Sounds.load_sound("assets/sounds/card_draw.wav", "card_draw")
-Sounds.load_sound("assets/sounds/card_freeze.wav", "card_freeze")
-Sounds.load_sound("assets/sounds/card_select.wav", "card_select")
+Sounds.load_sound("assets/sounds/title_music.ogg", "title_music")
+Sounds.load_sound("assets/sounds/background_music.ogg", "background_music")
+Sounds.load_sound("assets/sounds/card_discard.ogg", "card_discard")
+Sounds.load_sound("assets/sounds/card_draw.ogg", "card_draw")
+Sounds.load_sound("assets/sounds/card_freeze.ogg", "card_freeze")
+Sounds.load_sound("assets/sounds/card_select.ogg", "card_select")
 
 # Load fonts
 pygame.font.init()
