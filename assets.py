@@ -86,7 +86,7 @@ Images.register_image(render_outlined(alagard, "[Press Enter to Play]", (200, 20
 Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "EVALUATION_top")
 Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "EVALUATION_bot")
 Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "SHOWDOWN_top")
-Images.register_image(render_outlined(alagard_small, "", (125, 125, 125), (41, 51, 61), 1), "SHOWDOWN_bot")
+Images.register_image(render_outlined(alagard_small, "[Press Enter to Proceed to the next Round]", (125, 125, 125), (41, 51, 61), 1), "SHOWDOWN_bot")
 
 # Load images
 poker_background = pygame.transform.scale(

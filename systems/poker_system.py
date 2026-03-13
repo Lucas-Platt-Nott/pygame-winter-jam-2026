@@ -97,7 +97,12 @@ class PokerSystem:
                 elif self.state["phase"] == PhaseState.FREEZE:
                     self.player.hand.freeze_selected()
                     self.state["phase"] = PhaseState.DISCARD
-                    self.to_discard = 2
+
+                    if self.state["round"] == RoundState.PRE_FLOP:
+                        self.to_discard = 3
+
+                    else:
+                        self.to_discard = 2
 
                 elif self.state["phase"] == PhaseState.HAND_SELECTION:
                     self.calculator.calculate_score(self.player.hand, self.community_cards)
@@ -112,6 +117,15 @@ class PokerSystem:
 
                     elif self.state["round"] == RoundState.TURN:
                         self.state["phase"] = PhaseState.NEXT_PHASE
+
+                elif self.state["phase"] == PhaseState.SHOWDOWN:
+                    # Next round
+                    self.player.hand.discard_selected()
+                    self.opponent.hand.discard_selected()
+                    self.opponent.hand.hide_selected = True
+                    self.state["phase"] = PhaseState.DRAW
+                    self.state["round"] = RoundState.PRE_FLOP
+                    self.community_cards.cards = []
 
             elif key in nums and self.state["phase"] in [
                 PhaseState.DISCARD,
@@ -163,8 +177,7 @@ class PokerSystem:
             self.state["phase"] = PhaseState.DRAWING
 
         elif phase_state == PhaseState.DRAWING and self.player.cards_to_draw == 0:
-            self.state["phase"] = PhaseState.DISCARD
-            self.to_discard = 3
+            self.state["phase"] = PhaseState.FREEZE
 
         elif phase_state == PhaseState.NEXT_PHASE:
             self.opponent.hand.select_random()
