@@ -22,9 +22,8 @@ def render_outlined(font: pygame.Font, text: str, text_color: pygame.typing.Colo
     if old_outline != 0:
         font.outline = 0
 
-    font.outline = outline_width
-
     base_text_surf = font.render(text, True, text_color)
+    font.outline = outline_width
     outlined_text_surf = font.render(text, True, outline_color)
 
     outlined_text_surf.blit(base_text_surf, (outline_width, outline_width))
@@ -51,8 +50,8 @@ alagard_small = pygame.Font("assets/fonts/alagard.ttf", 16)
 
 # Load text
 Images.register_image(render_outlined(alagard_large, "FROZEN\n FUNDS", (255, 255, 255), (41, 51, 61), 4), "title")
-Images.register_image(render_outlined(alagard_small, "(Made for Pygame Winter Jam 2026 by ImNottL & Commando)", (125, 125, 125), (1, 1, 1), 1), "credits")
-Images.register_image(render_outlined(alagard, "[Press Enter to Play]", (175, 175, 175), (1, 1, 1), 1), "title_prompt")
+Images.register_image(render_outlined(alagard_small, "(Made for Pygame Winter Jam 2026 by ImNottL & Commando)", (125, 125, 125), (41, 51, 61), 1), "credits")
+Images.register_image(render_outlined(alagard, "[Press Enter to Play]", (175, 175, 175), (41, 51, 61), 1), "title_prompt")
 
 # Draw prompts
 Images.register_image(render_outlined(alagard_small, "Cards are dealt at the start of each phase:", (125, 125, 125), (1, 1, 1), 1), "DRAWING_top")
