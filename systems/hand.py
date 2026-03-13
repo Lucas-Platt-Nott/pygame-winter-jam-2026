@@ -52,7 +52,6 @@ class Hand:
 
         # Cards currently animating out
         self.discarding = []
-        self.submitted = []
 
     @property
     def cards(self) -> list[Card]:
@@ -86,13 +85,6 @@ class Hand:
 
     def calculate_selected_score(self, community_cards):
         pass
-
-    def calculate_submitted_score(self, community_cards):
-        pass
-
-    def submit(self):
-        self.submitted = self.get_selected_cards()
-        self.discard_selected()
 
     def get_selected_cards(self):
         return [card for card in self._cards if card.selected]
@@ -325,6 +317,9 @@ class Hand:
 
     def update(self, delta_time: float) -> None:
         self.render_surface(delta_time)
+
+        for card in self.cards:
+            card.highlighted = False
 
     def draw(self, surface: pygame.Surface) -> None:
         if self.flip:

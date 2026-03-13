@@ -15,7 +15,7 @@ class PokerPlayer:
         self.time_elapsed = 0
         self.cards_to_draw = 0
         self.draw_interval = 0.6
-
+        
     @property
     def hand(self) -> Hand:
         return self._hand

@@ -8,7 +8,7 @@ from pygame.locals import *
 
 # Internal
 from config import *
-from systems import PokerPlayer, Player, Deck, CommunityCards
+from systems import PokerPlayer, Player, Deck, CommunityCards, HandCalculator
 
 # Poker Round/Phase States
 class RoundState(Enum):
@@ -39,6 +39,7 @@ class PokerSystem:
         self.player = player
         self.opponent = opponent
         self.to_discard = 0
+        self.calculator = HandCalculator()
 
         self.state = {
             "round": RoundState.PRE_FLOP,
@@ -52,6 +53,9 @@ class PokerSystem:
 
             if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
                 self.player.hand.select(self.player.hand.cards.index(selected[0]))
+
+            elif self.state["phase"] == PhaseState.DISCARD and len(selected) == self.to_discard:
+                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
             elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
                     self.player.hand.select(self.player.hand.cards.index(selected[0]))
@@ -67,7 +71,7 @@ class PokerSystem:
                     if selected_num <= self.to_discard:   
                         self.to_discard -= selected_num
                         self.player.hand.discard_selected()
-                    
+                        
                     if self.to_discard == 0:
                         self.state["phase"] = PhaseState.NEXT_PHASE
 
@@ -77,7 +81,7 @@ class PokerSystem:
                     self.to_discard = 2
 
                 elif self.state["phase"] == PhaseState.HAND_SELECTION:
-                    self.player.hand.submit()
+                    print(self.calculator.calculate_score(self.player.hand, self.community_cards))
 
                 elif self.state["phase"] == PhaseState.DRAW and self.state["round"] != RoundState.PRE_FLOP:
                     self.state["phase"] = PhaseState.DRAWING
@@ -90,17 +94,23 @@ class PokerSystem:
                         self.state["phase"] = PhaseState.NEXT_PHASE
 
             elif key in nums and self.state["phase"] in [PhaseState.DISCARD, PhaseState.FREEZE, PhaseState.HAND_SELECTION]:
-                selected = self.player.hand.get_selected_cards()
                 index = nums.index(key)
+                selected = self.player.hand.get_selected_cards()
 
                 if index < len(self.player.hand.cards):
+                    if self.player.hand.cards[index].selected:
+                        pass
+
+                    elif self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
+                        self.player.hand.select(self.player.hand.cards.index(selected[0]))
+
+                    elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard:
+                        self.player.hand.select(self.player.hand.cards.index(selected[0]))
+
+                    elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
+                        self.player.hand.select(self.player.hand.cards.index(selected[0]))
+
                     self.player.hand.select(index)
-
-                if self.state["phase"] == PhaseState.FREEZE and len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
-                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
-
-                elif self.state["phase"] == PhaseState.HAND_SELECTION and len(selected) == 5 and len(self.player.hand.get_selected_cards()) != 4:
-                    self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
     # PRE-FLOP
     def update_preflop(self, delta_time: float) -> None:
@@ -167,7 +177,7 @@ class PokerSystem:
         phase_state = self.state["phase"]
 
         if phase_state == PhaseState.HAND_SELECTION:
-            pass
+            self.calculator.calculate_score(self.player.hand, self.community_cards)
         
         elif phase_state == PhaseState.EVALUATION:
             pass
@@ -177,7 +187,6 @@ class PokerSystem:
         
     def update(self, delta_time: float) -> None:
         round_state = self.state["round"]
-        print(round_state)
 
         self.player.update(self.deck, delta_time)
         self.opponent.update(self.deck, delta_time)

@@ -70,7 +70,7 @@ Images.register_image(render_outlined(alagard_small, "Would you like to raise th
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Place Bet]", (125, 125, 125), (1, 1, 1), 1), "BET_bot")
 
 # Freeze prompts
-Images.register_image(render_outlined(alagard_small, "                    Select up to one Regular Card to Freeze \n                      (Thawed after an attempted Discard)\n  The Card gains 1x discard protection and +1 value when scored.", (125, 125, 125), (1, 1, 1), 1), "FREEZE_top")
+Images.register_image(render_outlined(alagard_small, "                    Select up to one Regular Card to Freeze \n  The Card gains 1x discard protection and +1 value when scored.", (125, 125, 125), (1, 1, 1), 1), "FREEZE_top")
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Freeze Selected]", (125, 125, 125), (1, 1, 1), 1), "FREEZE_bot")
 
 # Discard prompts
