@@ -91,6 +91,10 @@ class PokerSystem:
 
                     if selected_num <= self.to_discard:
                         self.to_discard -= selected_num
+                        for card in self.player.hand.get_selected_cards():
+                            if card.type != "Frozen":
+                                self.discarded.append(card)
+
                         self.player.hand.discard_selected()
 
                     if self.to_discard == 0:
@@ -133,6 +137,9 @@ class PokerSystem:
                     self.state["phase"] = PhaseState.DRAW
                     self.state["round"] = RoundState.PRE_FLOP
                     self.community_cards.cards = []
+
+                    for discarded in self.discarded:
+                        self.deck.add_card(discarded)
 
             elif key in nums and self.state["phase"] in [
                 PhaseState.DISCARD,
@@ -191,6 +198,10 @@ class PokerSystem:
                 self.opponent.hand.select_random()
                 self.opponent.hand.discard_selected()
 
+            for card in self.opponent.hand.get_selected_cards():
+                if card.type != "Frozen":
+                    self.discarded.append(card)
+
             self.state["phase"] = PhaseState.DRAW
             self.state["round"] = RoundState.FLOP
 
@@ -217,9 +228,13 @@ class PokerSystem:
             self.state["phase"] = PhaseState.FREEZE
 
         elif phase_state == PhaseState.NEXT_PHASE:
-            while self.opponent.hand.num_cards > 2:
-                self.opponent.hand.select_random()
-                self.opponent.hand.discard_selected()
+            self.opponent.hand.select_random()
+            self.opponent.hand.select_random()
+            for card in self.opponent.hand.get_selected_cards():
+                if card.type != "Frozen":
+                    self.discarded.append(card)
+
+            self.opponent.hand.discard_selected()
 
             self.state["phase"] = PhaseState.DRAW
 
