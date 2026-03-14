@@ -71,7 +71,7 @@ Images.register_image(render_outlined(alagard_small, "                    Select
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Freeze Selected]", (125, 125, 125), (41, 51, 61), 1), "FREEZE_bot")
 
 # Discard prompts
-Images.register_image(render_outlined(alagard_small, "       Discard 3 Cards, Discarded Frozen Cards will Thaw instead.\n         (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top_preflop")
+Images.register_image(render_outlined(alagard_small, "       Discard until you have 2 Regular Cards, Discarded Frozen Cards will Thaw instead.\n         (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top_preflop")
 Images.register_image(render_outlined(alagard_small, "       Discard 2 Cards, Discarded Frozen Cards will Thaw instead.\n         (Discarded cards are NOT returned to The Deck)", (125, 125, 125), (41, 51, 61), 1), "DISCARD_top")
 Images.register_image(render_outlined(alagard_small, "[Press Enter to Discard Selected]", (125, 125, 125), (41, 51, 61), 1), "DISCARD_bot")
 

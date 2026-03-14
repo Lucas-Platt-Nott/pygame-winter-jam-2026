@@ -37,6 +37,12 @@ class CommunityCards:
         if card == None:
             return
         
+        card.angle = 0
+        card.get_rotated(card.angle)
+        card.highlighted = False
+        card.selected = False
+        card.render()
+
         if len(self.cards) >= 5:
             return  # Can't exceed 5 community cards
 

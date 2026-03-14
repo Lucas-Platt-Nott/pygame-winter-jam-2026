@@ -24,6 +24,9 @@ class PokerPlayer:
     def draw_cards(self, deck: Deck, amount: int) -> None:
         for i in range(amount):
             card = deck.draw_card()
+            while card in self.hand.cards:
+                 card = deck.draw_card()
+
             self.hand.add(card)
 
     def update(self, deck: Deck, delta_time: float) -> None:

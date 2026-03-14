@@ -109,6 +109,19 @@ class Hand:
             anim["select_start_offset"] = current_offset
             anim["select_target_offset"] = target_offset
 
+    def select_card(self, card) -> None:
+        anim = self.anim_data[card]
+        current_offset = anim.get("current_select_offset", 0.0)
+        card.selected = not card.selected
+        if card.selected:
+            Sounds.get_sound("card_select").play()
+
+        target_offset = -25 if card.selected else 0
+
+        anim["select_progress"] = 0.0
+        anim["select_start_offset"] = current_offset
+        anim["select_target_offset"] = target_offset
+
     def select_random(self) -> None:
         while True:
             index = random.randint(0, len(self.cards) - 1)
@@ -139,6 +152,9 @@ class Hand:
             return
 
         index = len(self._cards)
+        card.selected = False
+        card.highlighted = False
+        card.type = "default"
         self._cards.append(card)
 
         target_pos, target_angle = self._compute_target(index, len(self._cards))
@@ -273,7 +289,8 @@ class Hand:
                 continue
 
             self.remove(card)
-
+            del card
+            
         self.unfreeze_selected()
 
         for i, c in enumerate(self._cards):
@@ -288,7 +305,7 @@ class Hand:
 
     def freeze_selected(self) -> None:
         for card in self.get_selected_cards():
-            self.select(self.cards.index(card))
+            self.select_card(card)
 
             if card.type == "default":
                 card.type = "frozen"
@@ -298,7 +315,7 @@ class Hand:
 
     def unfreeze_selected(self) -> None:
         for card in self.get_selected_cards():
-            self.select(self.cards.index(card))
+            self.select_card(card)
 
             if card.type == "frozen":
                 card.type = "default"

@@ -101,7 +101,7 @@ class PokerSystem:
                     self.state["phase"] = PhaseState.DISCARD
 
                     if self.state["round"] == RoundState.PRE_FLOP:
-                        self.to_discard = 3
+                        self.to_discard = max(self.player.hand.num_cards - 2, 0)
 
                     else:
                         self.to_discard = 2
@@ -122,8 +122,13 @@ class PokerSystem:
 
                 elif self.state["phase"] == PhaseState.SHOWDOWN:
                     # Next round
+                    for card in self.player.hand.get_selected_cards():
+                        card.highlighted = False
+
                     self.player.hand.discard_selected()
                     self.opponent.hand.discard_selected()
+
+
                     self.opponent.hand.hide_selected = True
                     self.state["phase"] = PhaseState.DRAW
                     self.state["round"] = RoundState.PRE_FLOP
@@ -148,7 +153,7 @@ class PokerSystem:
                         elif len(selected) == 1 and len(self.player.hand.get_selected_cards()) != 0:
                             self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
-                    elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard:
+                    elif self.state["phase"] == PhaseState.DISCARD and len(selected) >= self.to_discard and len(selected) > 0:
                         self.player.hand.select(self.player.hand.cards.index(selected[0]))
 
                     elif (
@@ -182,10 +187,9 @@ class PokerSystem:
             self.state["phase"] = PhaseState.FREEZE
 
         elif phase_state == PhaseState.NEXT_PHASE:
-            self.opponent.hand.select_random()
-            self.opponent.hand.select_random()
-            self.opponent.hand.select_random()
-            self.opponent.hand.discard_selected()
+            for i in range(max(self.opponent.hand.num_cards - 2, 0)):
+                self.opponent.hand.select_random()
+                self.opponent.hand.discard_selected()
 
             self.state["phase"] = PhaseState.DRAW
             self.state["round"] = RoundState.FLOP
